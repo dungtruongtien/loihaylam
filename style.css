@@ -14,31 +14,31 @@ header {
   font-size: 18px;
   font-weight: bold;
 }
-main {
+.main-layout {
   flex: 1;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 2px 0;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 5px;
+  gap: 10px;
 }
-.adsbygoogle {
-  display: block !important;
-  min-height: 50px;
-  min-width: 300px;
-  max-width: 728px;
-  width: 90%;
-  margin: 3px auto;
+.ads-side {
+  flex: 0 0 160px;
+  display: flex;
+  justify-content: center;
+}
+.game-center {
+  flex: 0 1 auto;
+  text-align: center;
 }
 .game-container {
   text-align: center;
-  margin: 3px auto;
 }
 .card {
   width: 180px;
   height: 240px;
   perspective: 1000px;
-  margin: 3px auto;
+  margin: 5px auto;
 }
 .card-inner {
   position: relative;
@@ -85,7 +85,7 @@ main {
   background: #f44336;
 }
 .buttons {
-  margin-top: 3px;
+  margin-top: 5px;
 }
 .btn {
   border: none;

@@ -19,56 +19,55 @@
     <h1>Lói hay Làm</h1>
   </header>
 
-  <main>
-    <!-- Google Ads Top Banner (Test Mode, nhỏ 320px) -->
-    <ins class="adsbygoogle"
-        style="display:block; text-align:center; max-width:320px; width:100%; height:100px; margin:5px auto;"
-        data-ad-client="ca-pub-5200581180131547"
-        data-ad-slot="1234567890"
-        data-ad-format="auto"></ins>
-    <script>
-      window.addEventListener("load", function () {
-        setTimeout(() => {
-          try {
-            (adsbygoogle = window.adsbygoogle || []).push({});
-          } catch (e) {
-            console.error("AdSense error:", e);
-          }
-        }, 500);
-      });
-    </script>
+  <main class="main-layout">
+    <!-- Ads Left -->
+    <div class="ads-side">
+      <ins class="adsbygoogle"
+          style="display:block; max-width:160px; width:100%; height:300px; margin:0 auto;"
+          data-ad-client="ca-pub-5200581180131547"
+          data-ad-slot="1234567890"
+          data-ad-format="auto"></ins>
+      <script>
+        window.addEventListener("load", function () {
+          setTimeout(() => {
+            try {(adsbygoogle = window.adsbygoogle || []).push({});}catch(e){}
+          }, 500);
+        });
+      </script>
+    </div>
 
-    <div class="game-container">
-      <div class="card">
-        <div class="card-inner">
-          <div class="card-front">Lói hay Làm</div>
-          <div class="card-back"></div>
+    <!-- Game Center -->
+    <div class="game-center">
+      <div class="game-container">
+        <div class="card">
+          <div class="card-inner">
+            <div class="card-front">Lói hay Làm</div>
+            <div class="card-back"></div>
+          </div>
         </div>
-      </div>
-      <div class="buttons">
-        <button class="btn btn-do">LÀM</button>
-        <button class="btn btn-penalty">PHẠT</button>
-        <button class="btn btn-next">CHỌN BÀI</button>
+        <div class="buttons">
+          <button class="btn btn-do">LÀM</button>
+          <button class="btn btn-penalty">PHẠT</button>
+          <button class="btn btn-next">CHỌN BÀI</button>
+        </div>
       </div>
     </div>
 
-    <!-- Google Ads Bottom Banner (Test Mode, nhỏ 320px) -->
-    <ins class="adsbygoogle"
-        style="display:block; text-align:center; max-width:320px; width:100%; height:100px; margin:5px auto;"
-        data-ad-client="ca-pub-5200581180131547"
-        data-ad-slot="9876543210"
-        data-ad-format="auto"></ins>
-    <script>
-      window.addEventListener("load", function () {
-        setTimeout(() => {
-          try {
-            (adsbygoogle = window.adsbygoogle || []).push({});
-          } catch (e) {
-            console.error("AdSense error:", e);
-          }
-        }, 500);
-      });
-    </script>
+    <!-- Ads Right -->
+    <div class="ads-side">
+      <ins class="adsbygoogle"
+          style="display:block; max-width:160px; width:100%; height:300px; margin:0 auto;"
+          data-ad-client="ca-pub-5200581180131547"
+          data-ad-slot="9876543210"
+          data-ad-format="auto"></ins>
+      <script>
+        window.addEventListener("load", function () {
+          setTimeout(() => {
+            try {(adsbygoogle = window.adsbygoogle || []).push({});}catch(e){}
+          }, 500);
+        });
+      </script>
+    </div>
   </main>
 
   <footer>
