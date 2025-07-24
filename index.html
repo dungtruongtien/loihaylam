@@ -1,82 +1,102 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lói hay Làm - Game Vui Online</title>
-  <meta name="description" content="Chơi game Lói hay Làm online, thử thách bạn bè cùng những câu hỏi vui nhộn.">
+  <meta name="description"
+    content="Chơi game Lói hay Làm online, thử thách bạn bè cùng những câu hỏi vui nhộn, hỗ trợ tùy chỉnh câu hỏi một cách đơn giản.">
   <meta name="keywords" content="Lói hay Làm, game vui online, party game, câu hỏi vui, thử thách bạn bè">
   <meta name="robots" content="index, follow">
-
-  <!-- Google AdSense Test Mode -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5200581180131547"
-     crossorigin="anonymous"></script>
-
+    crossorigin="anonymous"></script>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
   <header>
-    <h1>Lói hay Làm</h1>
+    <h1>Lói hay Làm - Thử Thách hoặc Uống</h1>
   </header>
-
-  <main>
-    <!-- Google Ads Top Banner (Test Mode, nhỏ 320px) -->
-    <ins class="adsbygoogle"
-        style="display:block; text-align:center; max-width:320px; width:100%; height:100px; margin:5px auto;"
-        data-ad-client="ca-pub-5200581180131547"
-        data-ad-slot="1234567890"
-        data-ad-format="auto"></ins>
-    <script>
-      window.addEventListener("load", function () {
-        setTimeout(() => {
-          try {
-            (adsbygoogle = window.adsbygoogle || []).push({});
-          } catch (e) {
-            console.error("AdSense error:", e);
-          }
-        }, 500);
-      });
-    </script>
-
-    <div class="game-container">
-      <div class="card">
-        <div class="card-inner">
-          <div class="card-front">Lói hay Làm</div>
-          <div class="card-back"></div>
+  <main class="main-layout">
+    <div class="ads-side">
+      <ins class="adsbygoogle" style="display:block; max-width:160px; width:100%; height:300px; margin:0 auto;"
+        data-ad-client="ca-pub-5200581180131547" data-ad-slot="1234567890" data-ad-format="auto"
+        data-adtest="off"></ins>
+      <script>
+        window.addEventListener("load", () => {
+          setTimeout(() => { try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) { } }, 500);
+        });
+      </script>
+    </div>
+    <div class="game-center">
+      <div>
+        <!-- Content to improve AdSense approval -->
+        <!-- Toggle Button -->
+        <div class="guide-toggle">
+          <button onclick="toggleGuide()" class="btn btn-toggle">Hướng dẫn chơi</button>
+        </div>
+        <div id="guide-section" class="game-guide">
+          <section
+            style="text-align: left; max-width: 800px; margin: 40px auto; padding: 20px; background: #fff; border-radius: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.1); font-family: sans-serif;">
+            <h2>Hướng dẫn</h2>
+            <ul>
+              <li>Nhấn nút "Chọn Bài" để rút một lá bài ngẫu nhiên.</li>
+              <li>Tuỳ vào lá bài là Truth (Thật lòng) hay Dare (Thử thách), bạn hãy trả lời hoặc thực hiện yêu cầu.</li>
+              <li>Bạn cũng có thể tuỳ chỉnh bộ câu hỏi để phù hợp với nhóm bạn của mình ở phần Quản lý câu hỏi!</li>
+            </ul>
+          </section>
         </div>
       </div>
-      <div class="buttons">
-        <button class="btn btn-do">LÀM</button>
-        <button class="btn btn-penalty">PHẠT</button>
-        <button class="btn btn-next">CHỌN BÀI</button>
+      <div class="game-container">
+        <div class="card">
+          <div class="card-inner">
+            <div class="card-front">Lói hay Làm</div>
+            <div class="card-back"></div>
+          </div>
+        </div>
+        <div class="buttons">
+          <button class="btn btn-do">LÀM</button>
+          <button class="btn btn-penalty">PHẠT</button>
+          <button class="btn btn-next">CHỌN BÀI</button>
+        </div>
+        <div class="question-manager-container" style="margin-top:8px;">
+          <button id="toggle-manager" class="btn btn-next">Quản lý câu hỏi</button>
+          <div id="question-manager" class="hidden">
+            <h2>Danh sách câu hỏi</h2>
+            <ul id="question-list"></ul>
+            <div class="manager-actions">
+              <input type="text" id="new-question" placeholder="Nhập câu hỏi mới (tối đa 100 câu)" />
+              <select id="new-type">
+                <option value="truth">Truth</option>
+                <option value="dare">Dare</option>
+                <option value="penalty">Penalty</option>
+              </select>
+              <button id="add-question" class="btn btn-do">Thêm</button>
+            </div>
+            <p id="manager-info" style="font-size:12px;color:#666;">Tối thiểu 10 câu hỏi, tối đa 100 câu hỏi</p>
+          </div>
+        </div>
+
       </div>
     </div>
-
-    <!-- Google Ads Bottom Banner (Test Mode, nhỏ 320px) -->
-    <ins class="adsbygoogle"
-        style="display:block; text-align:center; max-width:320px; width:100%; height:100px; margin:5px auto;"
-        data-ad-client="ca-pub-5200581180131547"
-        data-ad-slot="9876543210"
-        data-ad-format="auto"></ins>
-    <script>
-      window.addEventListener("load", function () {
-        setTimeout(() => {
-          try {
-            (adsbygoogle = window.adsbygoogle || []).push({});
-          } catch (e) {
-            console.error("AdSense error:", e);
-          }
-        }, 500);
-      });
-    </script>
+    <div class="ads-side">
+      <ins class="adsbygoogle" style="display:block; max-width:160px; width:100%; height:300px; margin:0 auto;"
+        data-ad-client="ca-pub-5200581180131547" data-ad-slot="9876543210" data-ad-format="auto"
+        data-adtest="off"></ins>
+      <script>
+        window.addEventListener("load", () => {
+          setTimeout(() => { try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) { } }, 500);
+        });
+      </script>
+    </div>
   </main>
-
-  <footer>
-    © 2025 Lói hay Làm
-  </footer>
-
+  <footer>© 2025 Lói hay Làm</footer>
   <audio id="flip-sound" src="https://www.myinstants.com/media/sounds/card-flip.mp3"></audio>
   <audio id="click-sound" src="https://www.myinstants.com/media/sounds/mouse-click.mp3"></audio>
   <script src="script.js"></script>
+  </div>
+
 </body>
+
 </html>

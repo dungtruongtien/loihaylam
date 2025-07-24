@@ -6,87 +6,101 @@ body {
   flex-direction: column;
   min-height: 100vh;
 }
+
 header {
   background: orange;
-  color: white;
+  color: #fff;
   text-align: center;
   padding: 6px 0;
   font-size: 18px;
   font-weight: bold;
 }
-main {
+
+.main-layout {
   flex: 1;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 2px 0;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 5px;
+  gap: 10px;
 }
-.adsbygoogle {
-  display: block !important;
-  min-height: 50px;
-  min-width: 300px;
-  max-width: 728px;
-  width: 90%;
-  margin: 3px auto;
+
+.ads-side {
+  flex: 0 0 160px;
+  display: flex;
+  justify-content: center;
 }
-.game-container {
+
+.game-center {
+  flex: 0 1 auto;
   text-align: center;
-  margin: 3px auto;
 }
+
 .card {
   width: 180px;
   height: 240px;
   perspective: 1000px;
-  margin: 3px auto;
+  margin: 5px auto;
 }
+
 .card-inner {
   position: relative;
   width: 100%;
   height: 100%;
-  text-align: center;
   transition: transform 0.6s;
+  /* 👈 tăng thời gian lật lên 1 giây */
   transform-style: preserve-3d;
 }
+
 .card.flip .card-inner {
   transform: rotateY(180deg);
 }
-.card-front, .card-back {
+
+.card-front,
+.card-back {
   position: absolute;
   width: 100%;
   height: 100%;
   backface-visibility: hidden;
+  border-radius: 6px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 15px;
   font-weight: bold;
-  border-radius: 6px;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.15);
 }
+
 .card-front {
   background: #fff;
   color: #333;
 }
+
 .card-back {
   transform: rotateY(180deg);
+  background: #4caf50;
   color: #fff;
   font-size: 13px;
   padding: 4px;
 }
+
 .card-back.truth {
   background: #4caf50;
 }
+
 .card-back.dare {
   background: #ff9800;
   color: #333;
 }
+
 .card-back.penalty {
   background: #f44336;
 }
+
 .buttons {
-  margin-top: 3px;
+  margin-top: 20px;
 }
+
 .btn {
   border: none;
   padding: 5px 10px;
@@ -97,19 +111,201 @@ main {
   font-size: 13px;
   font-weight: bold;
 }
+
 .btn-do {
   background: #4caf50;
 }
+
 .btn-penalty {
   background: #f44336;
 }
+
 .btn-next {
   background: #2196f3;
 }
+
 footer {
   background: #f1f1f1;
   text-align: center;
   padding: 5px 0;
   font-size: 12px;
   color: #555;
+}
+
+
+.card.resetting .card-inner {
+  transform: rotateY(0deg) !important;
+  transition: none !important;
+}
+
+#question-manager.hidden {
+  display: none;
+}
+
+#question-manager {
+  margin-top: 8px;
+  border: 1px solid #ddd;
+  padding: 6px;
+  border-radius: 4px;
+  background: #fff;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+#question-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#question-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 2px 0;
+  padding: 4px;
+  border-bottom: 1px solid #eee;
+  font-size: 13px;
+}
+
+.manager-actions {
+  margin-top: 5px;
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+}
+
+.manager-actions input {
+  flex: 1;
+  padding: 4px;
+  font-size: 13px;
+}
+
+.manager-actions select {
+  padding: 4px;
+  font-size: 13px;
+}
+
+.manager-actions button {
+  padding: 4px 6px;
+  font-size: 13px;
+}
+
+.editable {
+  flex: 1;
+  margin-right: 5px;
+}
+
+.btn-delete {
+  background: #f44336;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 2px 5px;
+  font-size: 12px;
+}
+
+.question-manager-container {
+  display: block;
+  clear: both;
+  max-width: 300px;
+  margin: 10px auto 0 auto;
+  text-align: center;
+}
+
+#question-manager.hidden {
+  display: none;
+}
+
+#question-manager {
+  margin-top: 6px;
+  border: 1px solid #ddd;
+  padding: 6px;
+  border-radius: 4px;
+  background: #fff;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+#question-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#question-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 2px 0;
+  padding: 4px;
+  border-bottom: 1px solid #eee;
+  font-size: 13px;
+}
+
+.manager-actions {
+  margin-top: 5px;
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+}
+
+.manager-actions input {
+  flex: 1;
+  padding: 4px;
+  font-size: 13px;
+}
+
+.manager-actions select {
+  padding: 4px;
+  font-size: 13px;
+}
+
+.manager-actions button {
+  padding: 4px 6px;
+  font-size: 13px;
+}
+
+.editable {
+  flex: 1;
+  margin-right: 5px;
+}
+
+.btn-delete {
+  background: #f44336;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 2px 5px;
+  font-size: 12px;
+}
+
+.guide-toggle {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.btn-toggle {
+  padding: 6px 12px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: none;
+  background-color: #ffb347;
+  color: white;
+  cursor: pointer;
+}
+
+.btn-toggle:hover {
+  background-color: #ff9a00;
+}
+
+.game-guide {
+  background-color: #fff8e7;
+  padding: 10px 15px;
+  border-radius: 10px;
+  margin: 0 10px 20px;
+  font-size: 14px;
+  color: #333;
 }
