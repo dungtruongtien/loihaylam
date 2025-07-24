@@ -10,8 +10,8 @@ header {
   background: orange;
   color: white;
   text-align: center;
-  padding: 10px 0;
-  font-size: 20px;
+  padding: 6px 0;
+  font-size: 18px;
   font-weight: bold;
 }
 main {
@@ -19,30 +19,26 @@ main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  padding: 2px 0;
 }
-.ads-banner {
-  background: #e0e0e0;
-  color: #555;
+.adsbygoogle {
+  display: block !important;
+  min-height: 50px;
+  min-width: 300px;
+  max-width: 728px;
   width: 90%;
-  max-width: 600px;
-  height: 60px;
-  margin: 10px auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 5px;
-  font-size: 14px;
+  margin: 3px auto;
 }
 .game-container {
   text-align: center;
-  margin: 10px 0;
+  margin: 3px auto;
 }
 .card {
-  width: 200px;
-  height: 260px;
+  width: 180px;
+  height: 240px;
   perspective: 1000px;
-  margin: 10px auto;
+  margin: 3px auto;
 }
 .card-inner {
   position: relative;
@@ -63,10 +59,10 @@ main {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: bold;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  border-radius: 6px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.15);
 }
 .card-front {
   background: #fff;
@@ -75,8 +71,8 @@ main {
 .card-back {
   transform: rotateY(180deg);
   color: #fff;
-  font-size: 14px;
-  padding: 5px;
+  font-size: 13px;
+  padding: 4px;
 }
 .card-back.truth {
   background: #4caf50;
@@ -89,16 +85,16 @@ main {
   background: #f44336;
 }
 .buttons {
-  margin-top: 10px;
+  margin-top: 3px;
 }
 .btn {
   border: none;
-  padding: 8px 14px;
-  margin: 5px;
+  padding: 5px 10px;
+  margin: 2px;
   border-radius: 4px;
   cursor: pointer;
   color: #fff;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: bold;
 }
 .btn-do {
@@ -113,7 +109,7 @@ main {
 footer {
   background: #f1f1f1;
   text-align: center;
-  padding: 10px 0;
-  font-size: 14px;
+  padding: 5px 0;
+  font-size: 12px;
   color: #555;
 }

@@ -20,15 +20,24 @@
   </header>
 
   <main>
-    <!-- Google Ads Top Banner -->
+    <!-- Google Ads Top Banner (Test Mode) -->
     <ins class="adsbygoogle"
-        style="display:block; text-align:center; margin-bottom:10px;"
+        style="display:block; text-align:center; min-width:300px; min-height:60px; margin-bottom:10px;"
         data-ad-client="ca-pub-5200581180131547"
         data-ad-slot="1234567890"
         data-ad-format="auto"
-        data-full-width-responsive="true"></ins>
+        data-full-width-responsive="true"
+        ></ins>
     <script>
-        (adsbygoogle = window.adsbygoogle || []).push({});
+      window.addEventListener("load", function () {
+        setTimeout(() => {
+          try {
+            (adsbygoogle = window.adsbygoogle || []).push({});
+          } catch (e) {
+            console.error("AdSense error:", e);
+          }
+        }, 500);
+      });
     </script>
 
     <div class="game-container">
@@ -45,15 +54,24 @@
       </div>
     </div>
 
-    <!-- Google Ads Bottom Banner -->
+    <!-- Google Ads Bottom Banner (Test Mode) -->
     <ins class="adsbygoogle"
-        style="display:block; text-align:center; margin-top:10px;"
+        style="display:block; text-align:center; min-width:300px; min-height:60px; margin-top:10px;"
         data-ad-client="ca-pub-5200581180131547"
         data-ad-slot="9876543210"
         data-ad-format="rectangle"
-        data-full-width-responsive="true"></ins>
+        data-full-width-responsive="true"
+        ></ins>
     <script>
-        (adsbygoogle = window.adsbygoogle || []).push({});
+      window.addEventListener("load", function () {
+        setTimeout(() => {
+          try {
+            (adsbygoogle = window.adsbygoogle || []).push({});
+          } catch (e) {
+            console.error("AdSense error:", e);
+          }
+        }, 500);
+      });
     </script>
   </main>
 
