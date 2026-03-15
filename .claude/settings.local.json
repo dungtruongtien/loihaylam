@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --no-src-dir --import-alias \"@/*\" --yes)",
+      "Read(//private/tmp/**)",
+      "Bash(npx create-next-app@latest loihaylam_next --typescript --tailwind --eslint --app --no-src-dir --import-alias \"@/*\" --yes)",
+      "Bash(npx tsc:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(node -e \"require\\(''./lib/ws/handler''\\)\")",
+      "Bash(node -e \"require\\(''./lib/db''\\).initDb\\(\\); console.log\\(''DB OK''\\)\")",
+      "Bash(node -e \":*)",
+      "Bash(npx playwright:*)",
+      "Bash(curl:*)"
+    ]
+  }
+}

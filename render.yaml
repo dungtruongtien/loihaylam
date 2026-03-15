@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: loihaylam
+    runtime: node
+    buildCommand: npm install && npm run build
+    startCommand: node server.js
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DATABASE_PATH
+        value: /data/game.db
+    disk:
+      name: game-data
+      mountPath: /data
+      sizeGB: 1
