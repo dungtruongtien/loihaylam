@@ -94,6 +94,7 @@
   "ww.vote": "Bỏ phiếu",
   "ww.voted": "Đã bỏ phiếu",
   "ww.forceNight": "Kết thúc đêm",
+  "ww.endNight": "Kết thúc pha đêm",
 
   "ww.roleGuide": "Hướng dẫn vai",
   "ww.roles": "Các vai trong game",
@@ -107,12 +108,19 @@
   "ww.networkError": "Lỗi mạng",
   "ww.connecting": "Đang kết nối...",
   "ww.leaveRoom": "Rời phòng",
+  "ww.eliminated": "Bạn đã bị loại",
+  "ww.spectating": "Đang quan sát trận đấu...",
   "ww.loading": "Đang tải...",
+  "ww.redirecting": "Đang quay về trang chủ...",
   "ww.connected": "Đã kết nối",
   "ww.reconnecting": "Đang kết nối lại...",
   "ww.required": "là bắt buộc",
   "ww.endGame": "Kết thúc",
   "ww.endGameHint": "Đóng phòng cho tất cả người chơi",
+
+  "ww.role.host": "Chủ phòng",
+  "ww.role.host.desc": "Bạn là Chủ phòng. Điều phối trận đấu, kiểm soát các pha chuyển đổi và theo dõi Nhật ký hành động.",
+  "ww.role.host.goal": "Mục tiêu: Giữ cho trò chơi diễn ra suôn sẻ",
 
   "ww.role.seer": "Tiên tri",
   "ww.role.seer.desc": "Mỗi đêm, bí mật điều tra một người chơi để biết họ có phải Sói hay không.",
@@ -135,18 +143,6 @@
   "ww.defend.send": "Gửi bào chữa",
   "ww.defend.skip": "Bỏ qua",
   "ww.defend.waiting": "Đang chờ {name} bào chữa...",
-
-  "ww.witch.title": "Lượt của Phù thủy",
-  "ww.witch.save": "Cứu {name}",
-  "ww.witch.poison": "Đầu độc ai đó",
-  "ww.witch.skip": "Không làm gì đêm nay",
-  "ww.witch.usedHeal": "Đã dùng thuốc cứu",
-  "ww.witch.usedPoison": "Đã dùng thuốc độc",
-
-  "ww.hunter.title": "Phát súng cuối của Thợ săn",
-  "ww.hunter.subtitle": "{name} bị loại — họ có một phát súng cuối",
-  "ww.hunter.shoot": "Bắn",
-  "ww.hunter.waiting": "Đang chờ {name} bắn...",
 
   "ww.roleConfig": "Cấu hình vai trò",
   "ww.customRoles": "Vai trò tùy chỉnh",

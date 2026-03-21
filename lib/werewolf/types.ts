@@ -2,14 +2,12 @@ export type Phase =
   | 'lobby'
   | 'role_reveal'
   | 'night'
-  | 'night_witch'
   | 'day_discuss'
   | 'day_vote'
   | 'day_defend'
-  | 'hunter_shoot'
   | 'ended';
 
-export type Role = 'wolf' | 'villager' | 'seer' | 'witch' | 'bodyguard' | 'hunter' | string;
+export type Role = 'wolf' | 'villager' | 'seer' | 'witch' | 'bodyguard' | 'hunter' | 'host' | string;
 export type Winner = 'wolves' | 'villagers' | null;
 
 export interface RoleConfig {
@@ -49,7 +47,6 @@ export interface RoomView {
   defenderId: string | null;
   defendMessage: string | null;
   defendEndsAt: number | null;
-  hunterId: string | null;
   roleConfig: RoleConfig;
 }
 
@@ -65,7 +62,6 @@ export interface GameState {
   myNightVote: string | null;
   // Role-specific private state:
   seerResult?: { targetId: string; targetName: string; isWolf: boolean } | null;
-  witchState?: { usedHeal: boolean; usedPoison: boolean; nightTarget?: string | null; nightTargetName?: string | null } | null;
   bodyguardLastTarget?: string | null;
   // Host only:
   gameLog?: GameLogEntry[];

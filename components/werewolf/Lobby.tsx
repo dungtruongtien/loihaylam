@@ -20,8 +20,8 @@ export default function Lobby({ gameState, myPlayerId, onSend }: Props) {
   const [showSettings, setShowSettings] = useState(false);
   const [showRoleGuide, setShowRoleGuide] = useState(false);
   const [showRoleConfig, setShowRoleConfig] = useState(false);
-  const [wolfCount, setWolfCount] = useState(room.wolfCount);
-  const [discSecs, setDiscSecs] = useState(room.discussionSeconds);
+  const [wolfCount, setWolfCount] = useState(room.wolfCount ?? 1);
+  const [discSecs, setDiscSecs] = useState(room.discussionSeconds ?? 60);
 
   // Role config state
   const [roleConfig, setRoleConfig] = useState<RoleConfig>(
@@ -30,7 +30,7 @@ export default function Lobby({ gameState, myPlayerId, onSend }: Props) {
   const [newRoleName, setNewRoleName] = useState('');
   const [newRoleDesc, setNewRoleDesc] = useState('');
 
-  const maxWolves = Math.max(1, Math.floor(players.length / 2));
+  const maxWolves = Math.floor((players.length - 1) / 2) || 1;
 
   const copyCode = async () => {
     await navigator.clipboard.writeText(room.id);
@@ -126,10 +126,10 @@ export default function Lobby({ gameState, myPlayerId, onSend }: Props) {
               <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem' }}>
-                    {t('ww.wolfCount')} (max {maxWolves})
+                    {t('ww.wolfCount')} — max {maxWolves} for {players.length} players
                   </label>
-                  <input type="number" className="input" min={1} max={maxWolves} value={wolfCount}
-                    onChange={(e) => setWolfCount(Math.min(maxWolves, Math.max(1, +e.target.value)))} />
+                  <input type="number" className="input" min={1} value={wolfCount}
+                    onChange={(e) => setWolfCount(Math.max(1, +e.target.value))} />
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem' }}>
@@ -141,9 +141,14 @@ export default function Lobby({ gameState, myPlayerId, onSend }: Props) {
                 </div>
                 <div style={{ background: 'var(--panel2)', borderRadius: 10, padding: '0.75rem 1rem' }}>
                   <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                    {t('ww.wolfCount')}: <strong style={{ color: 'var(--wolf)' }}>{wolfCount} 🐺</strong> &nbsp;
+                    {t('ww.wolfCount')}: <strong style={{ color: wolfCount > maxWolves ? 'var(--danger, #e53)' : 'var(--wolf)' }}>{wolfCount} 🐺</strong> &nbsp;
                     {t('ww.discussionTime')}: <strong style={{ color: 'var(--brand)' }}>{discSecs}s</strong>
                   </p>
+                  {wolfCount > maxWolves && (
+                    <p style={{ fontSize: '0.75rem', color: 'var(--danger, #e53)', marginTop: '0.3rem' }}>
+                      ⚠️ Wolf count too high — max {maxWolves} for {players.length} players
+                    </p>
+                  )}
                 </div>
                 <button className="btn primary" onClick={applySettings}>✓ {t('ww.apply')}</button>
               </div>

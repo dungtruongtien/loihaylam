@@ -22,7 +22,12 @@ export default function RoleReveal({ gameState, onSend }: Props) {
         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{t('ww.readYourRole')}</p>
       </div>
 
-      {myRole && <RoleCard role={myRole} customDesc={gameState.myRoleDesc} />}
+      {myRole && myRole !== 'host' && <RoleCard role={myRole} customDesc={gameState.myRoleDesc} />}
+
+      {/* Host: show special host card */}
+      {myRole === 'host' && (
+        <RoleCard role="host" />
+      )}
 
       {/* Show wolf teammates to wolves */}
       {myRole === 'wolf' && wolfNames.length > 1 && (

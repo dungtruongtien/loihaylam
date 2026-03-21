@@ -1,113 +1,138 @@
 /**
- * Werewolf E2E Test — Basic Game: 2 Wolves vs 5 Villagers (7 players total)
+ * Werewolf E2E Test — Wolves Win
  *
- * Simulates a full multiplayer game by running 7 browser contexts in one test.
- * Each context is an independent "player" with their own WebSocket session.
+ * 8 browsers total: Player0 is host-only (no role), Player1–Player7 are game participants.
+ * 2 wolves (Player6, Player7), 5 villagers (Player1–Player5).
+ * Roles are seeded via API before the game starts so the scenario is fully deterministic.
+ *
+ * Scenario:
+ *   Night 1: Wolves kill Player1         → 2W + 4V
+ *   Day 1:   Village votes out Player2   → 2W + 3V  (misidentified villager)
+ *   Night 2: Wolves kill Player3         → 2W + 2V  → Wolves Win (wolves ≥ villagers)
  *
  * Run:
  *   npm run test:e2e           — headless (fastest)
  *   npm run test:e2e:headed    — watch browsers open
- *   npm run test:e2e:ui        — Playwright UI mode (live progress in browser ← recommended)
- *   npm run test:e2e:report    — open HTML report after test finishes
+ *   npm run test:e2e:ui        — Playwright UI mode (live progress)
  */
 
-import { test, expect, BrowserContext, Page } from '@playwright/test';
+import { test, expect, chromium, Browser, BrowserContext, Page } from '@playwright/test';
 
-// ─── Config ──────────────────────────────────────────────────────────────────
-const BASE_URL = 'http://localhost:9999/werewolf';
-const TOTAL_PLAYERS = 7;
-const WOLF_COUNT = 2;
-const MAX_ROUNDS = 20;
+// ─── Config ───────────────────────────────────────────────────────────────────
+const BASE_URL      = 'http://localhost:9999/werewolf';
+const TOTAL_PLAYERS = 8;  // Player0 (host) + Player1–Player7 (game participants)
+const WOLF_COUNT    = 2;
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-interface Player {
-  ctx: BrowserContext;
-  page: Page;
-  name: string;
-  role: 'wolf' | 'villager' | null;
+// ─── Role Map ─────────────────────────────────────────────────────────────────
+// Player0 is host-only — no role. Player1–Player7 are seeded before game start.
+const ROLE_MAP: Record<string, 'wolf' | 'villager'> = {
+  Player1: 'villager',
+  Player2: 'villager',
+  Player3: 'villager',
+  Player4: 'villager',
+  Player5: 'villager',
+  Player6: 'wolf',
+  Player7: 'wolf',
+};
+
+// ─── Scenario ─────────────────────────────────────────────────────────────────
+interface NightEvent { night: number; victim: string }
+interface DayEvent   { day: number; voted: string; is_defense_successful: boolean }
+type ScenarioEvent = NightEvent | DayEvent;
+
+const SCENARIO: ScenarioEvent[] = [
+  { night: 1, victim: 'Player1' },                                            // 2W + 5V → 2W + 4V
+  { day: 1,   voted: 'Player2', is_defense_successful: false },               // → 2W + 3V
+  { night: 2, victim: 'Player3' },                                            // → 2W + 2V → Wolves Win
+];
+
+const EXPECTED_WINNER = 'Wolves Win';
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+interface Player { browser: Browser; ctx: BrowserContext; page: Page; name: string }
+
+async function waitForAnyPhase(page: Page, headings: string[], timeout = 30_000): Promise<string> {
+  const deadline = Date.now() + timeout;
+  let lastSeen = '';
+  while (Date.now() < deadline) {
+    const h2 = (await page.locator('h2').first().textContent().catch(() => '')) ?? '';
+    if (h2 !== lastSeen) { console.log(`  [phase] "${h2.trim()}"`); lastSeen = h2; }
+    for (const h of headings) { if (h2.includes(h)) return h2; }
+    await page.waitForTimeout(500);
+  }
+  const final = (await page.locator('h2').first().textContent().catch(() => '')) ?? '';
+  console.log(`  [phase] timeout. Last: "${final.trim()}". Expected: ${headings.join(', ')}`);
+  return final;
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-/** Wait until an h2 heading with matching text appears. */
-async function waitForPhase(page: Page, headingText: string, timeout = 25_000) {
-  await page.waitForSelector(`h2:has-text("${headingText}")`, { timeout });
+function isGameEnded(dead: Set<string>): boolean {
+  const aliveWolves    = wolves.filter((n) => !dead.has(n));
+  const aliveVillagers = villagers.filter((n) => !dead.has(n));
+  return aliveWolves.length === 0 || aliveWolves.length >= aliveVillagers.length;
 }
 
-/** Return the current h2 text (phase heading). */
-async function getPhaseHeading(page: Page): Promise<string> {
-  return (await page.locator('h2').first().textContent().catch(() => '')) ?? '';
-}
-
-/** True when the game-ended screen is visible. */
-async function isGameEnded(page: Page): Promise<boolean> {
-  const h2 = await getPhaseHeading(page);
-  return h2.includes('Win');
-}
-
-/** Log a step both to console and as a Playwright annotation. */
-function log(msg: string) {
-  console.log(msg);
-}
+const wolves    = Object.entries(ROLE_MAP).filter(([, r]) => r === 'wolf').map(([n]) => n);
+const villagers = Object.entries(ROLE_MAP).filter(([, r]) => r === 'villager').map(([n]) => n);
 
 // ─── Test ─────────────────────────────────────────────────────────────────────
-
-test.describe('Werewolf — Basic Game (2 Wolves vs 5 Villagers)', () => {
-  test(`Full game with ${TOTAL_PLAYERS} players`, async ({ browser }) => {
+test.describe('Werewolf — Wolves Win', () => {
+  test(`${TOTAL_PLAYERS} players: ${wolves.join(', ')} are wolves — wolves win`, async () => {
     const players: Player[] = [];
 
-    // ── Spin up one browser context per player ────────────────────────────
     for (let i = 0; i < TOTAL_PLAYERS; i++) {
-      const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+      const b   = await chromium.launch({ args: ['--incognito'] });
+      const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, locale: 'en-US' });
       const page = await ctx.newPage();
-      // Suppress noisy HMR WebSocket errors in console
       page.on('console', (msg) => {
         if (msg.type() === 'error' && msg.text().includes('webpack-hmr')) return;
       });
-      players.push({ ctx, page, name: `Player${i + 1}`, role: null });
+      players.push({ browser: b, ctx, page, name: `Player${i}` });
     }
 
     const host = players[0];
+    const dead = new Set<string>();
+
+    const getPage = (name: string) => players.find((p) => p.name === name)!.page;
+
+    function logCounts(label: string) {
+      const aliveWolves    = wolves.filter((n) => !dead.has(n));
+      const aliveVillagers = villagers.filter((n) => !dead.has(n));
+      console.log(`\n📊 [${label}] alive: wolves=${aliveWolves.length} (${aliveWolves.join(', ')}) | villagers=${aliveVillagers.length} (${aliveVillagers.join(', ')}) | dead=[${[...dead].join(', ')}]`);
+    }
 
     try {
-      // ════════════════════════════════════════════════════════════════════
+      // ══════════════════════════════════════════════════════════════════
       // STEP 1 — Host creates room
-      // ════════════════════════════════════════════════════════════════════
+      // ══════════════════════════════════════════════════════════════════
       await test.step('Host creates room', async () => {
-        log('\n🏠 Step 1: Creating room...');
         await host.page.goto(BASE_URL);
         await host.page.getByRole('button', { name: 'Create Room' }).click();
         await host.page.getByPlaceholder('Enter your name...').fill(host.name);
         await host.page.getByRole('button', { name: 'Create Room' }).click();
         await host.page.waitForSelector('text=Room Code:', { timeout: 10_000 });
-        log('  Room created successfully');
+        console.log('  Room created ✓');
       });
 
-      // ════════════════════════════════════════════════════════════════════
+      // ══════════════════════════════════════════════════════════════════
       // STEP 2 — Extract room code
-      // ════════════════════════════════════════════════════════════════════
-      let roomCode: string;
-
+      // ══════════════════════════════════════════════════════════════════
+      let roomCode!: string;
       await test.step('Extract room code', async () => {
-        // The room code is a 6-char uppercase alphanumeric displayed prominently
         const code = await host.page.evaluate((): string => {
-          const allDivs = Array.from(document.querySelectorAll('div'));
-          const el = allDivs.find((d) =>
-            d.children.length === 0 && /^[A-Z0-9]{6}$/.test(d.textContent?.trim() ?? '')
+          const el = Array.from(document.querySelectorAll('div')).find(
+            (d) => d.children.length === 0 && /^[A-Z0-9]{6}$/.test(d.textContent?.trim() ?? '')
           );
           return el?.textContent?.trim() ?? '';
         });
-        expect(code, 'Room code should be 6 uppercase chars').toMatch(/^[A-Z0-9]{6}$/);
+        expect(code).toMatch(/^[A-Z0-9]{6}$/);
         roomCode = code;
-        log(`  Room code: ${roomCode}`);
-        await host.page.screenshot({ path: `playwright-report/step1-room-created.png` });
+        console.log(`  Room code: ${roomCode}`);
       });
 
-      // ════════════════════════════════════════════════════════════════════
-      // STEP 3 — Other players join (in parallel)
-      // ════════════════════════════════════════════════════════════════════
-      await test.step(`${TOTAL_PLAYERS - 1} players join`, async () => {
-        log(`\n👥 Step 3: Players 2–${TOTAL_PLAYERS} joining...`);
+      // ══════════════════════════════════════════════════════════════════
+      // STEP 3 — Other players join
+      // ══════════════════════════════════════════════════════════════════
+      await test.step(`Players Player1–Player7 join`, async () => {
         await Promise.all(
           players.slice(1).map(async (player) => {
             await player.page.goto(BASE_URL);
@@ -115,366 +140,292 @@ test.describe('Werewolf — Basic Game (2 Wolves vs 5 Villagers)', () => {
             await player.page.getByPlaceholder('Enter your name...').fill(player.name);
             await player.page.getByPlaceholder('e.g. ABC123').fill(roomCode);
             await player.page.getByRole('button', { name: 'Join' }).click();
-            await player.page.waitForSelector('text=Waiting for players...', {
-              timeout: 15_000,
-            });
-            log(`  ${player.name} joined ✓`);
+            await player.page.waitForSelector('text=Waiting for players...', { timeout: 15_000 });
+            console.log(`  ${player.name} joined ✓`);
           })
         );
-        log(`  All ${TOTAL_PLAYERS - 1} players joined ✓`);
       });
 
-      // ════════════════════════════════════════════════════════════════════
-      // STEP 4 — Host configures wolf count = 2
-      // NOTE: update_settings triggers a broadcast, so after this the host's
-      //       UI will reflect all 7 players who are now in roomSockets.
-      // ════════════════════════════════════════════════════════════════════
-      await test.step(`Set wolf count to ${WOLF_COUNT}`, async () => {
-        log(`\n⚙️  Step 4: Setting ${WOLF_COUNT} wolves...`);
-        // Open Settings panel
+      // ══════════════════════════════════════════════════════════════════
+      // STEP 4 — Configure: 2 wolves, 30s discussion
+      // ══════════════════════════════════════════════════════════════════
+      await test.step(`Set wolf count=${WOLF_COUNT}, discussion=30s`, async () => {
         await host.page.locator('button', { hasText: 'Settings' }).click();
-        await host.page.waitForTimeout(500); // wait for panel to render
+        await host.page.waitForTimeout(500);
 
-        // Use native value setter + input event to properly trigger React's onChange
-        // (Playwright's fill/type can be blocked by React's controlled input mechanism)
-        await host.page.evaluate((value) => {
-          const input = document.querySelector('input[type="number"]') as HTMLInputElement;
-          if (!input) return;
-          // Use the native setter to bypass React's internal value tracking
-          const nativeSetter = Object.getOwnPropertyDescriptor(
-            window.HTMLInputElement.prototype,
-            'value'
-          )?.set;
-          nativeSetter?.call(input, String(value));
-          // Fire both 'input' and 'change' events so React's synthetic events fire
-          input.dispatchEvent(new Event('input', { bubbles: true }));
-          input.dispatchEvent(new Event('change', { bubbles: true }));
-        }, WOLF_COUNT);
+        const wolfInput = host.page.locator('input[type="number"]');
+        await wolfInput.click();
+        await host.page.evaluate((val: string) => {
+          const el = document.querySelector('input[type="number"]') as HTMLInputElement;
+          const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!;
+          setter.call(el, val);
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+        }, String(WOLF_COUNT));
+        expect(await wolfInput.inputValue()).toBe(String(WOLF_COUNT));
 
-        // Verify the input value was set
-        const inputVal = await host.page.locator('input[type="number"]').inputValue();
-        log(`  Wolf count input value: ${inputVal}`);
-
-        // Apply — sends update_settings → server broadcasts to all 7 players
+        await host.page.locator('select').selectOption('30');
         await host.page.locator('button', { hasText: 'Apply' }).click();
-        log(`  Wolf count applied ✓`);
-
-        // Now the host's view is updated via broadcast — verify all 7 players visible
-        await host.page.waitForSelector(`text=Players (${TOTAL_PLAYERS})`, {
-          timeout: 15_000,
-        });
-        log(`  All ${TOTAL_PLAYERS} players confirmed in lobby ✓`);
-        await host.page.screenshot({ path: `playwright-report/step4-lobby-full.png` });
+        await host.page.waitForSelector(`text=Players (${TOTAL_PLAYERS})`, { timeout: 15_000 });
+        console.log('  Settings applied ✓');
       });
 
-      // ════════════════════════════════════════════════════════════════════
-      // STEP 5 — Start game
-      // ════════════════════════════════════════════════════════════════════
-      await test.step('Host starts game', async () => {
-        log('\n🎮 Step 5: Starting game...');
-        await host.page.getByRole('button', { name: 'Start Game' }).click();
-      });
-
-      // ════════════════════════════════════════════════════════════════════
-      // STEP 6 — Role reveal
-      // ════════════════════════════════════════════════════════════════════
-      await test.step('Role reveal phase', async () => {
-        log('\n🎭 Step 6: Role reveal...');
-        await Promise.all(
-          players.map((p) => p.page.waitForSelector('text=Your Role', { timeout: 15_000 }))
-        );
-
-        // Debug: check the wolf count from the host's game state
-        const hostGameInfo = await host.page.evaluate(() => {
-          // React fiber inspection to get gameState would be complex;
-          // instead read visible text that shows wolf count
-          return document.body.innerText;
+      // ══════════════════════════════════════════════════════════════════
+      // STEP 5 — Seed roles (deterministic assignment)
+      // ══════════════════════════════════════════════════════════════════
+      await test.step('Seed roles via API', async () => {
+        const res = await fetch(`${BASE_URL.replace('/werewolf', '')}/api/rooms/${roomCode}/seed-roles`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ roles: ROLE_MAP }),
         });
-        // The role_reveal page shows wolf pack info for wolves
-        const wolfPackVisible = hostGameInfo.includes('Your pack');
-        log(`  Host sees wolf pack info: ${wolfPackVisible}`);
-        // Also check if wolfCount setting is visible
-        const wolfCountMatch = hostGameInfo.match(/Wolf Count[^\d]*(\d+)/);
-        if (wolfCountMatch) log(`  Wolf count in UI: ${wolfCountMatch[1]}`);
-        // Screenshot each player's role card
-        for (const player of players) {
-          await player.page.screenshot({
-            path: `playwright-report/role-${player.name}.png`,
-          });
+        const json = await res.json() as { ok?: boolean; error?: string };
+        expect(json.ok, `seed-roles failed: ${json.error}`).toBe(true);
+
+        const verify = await fetch(`${BASE_URL.replace('/werewolf', '')}/api/rooms/${roomCode}`);
+        const { players: serverPlayers } = await verify.json() as { players: { name: string; role: string }[] };
+        console.log('\n🔍 Server roles after seeding:');
+        for (const sp of serverPlayers) {
+          const expected = ROLE_MAP[sp.name] ?? '?';
+          const match = sp.role === expected ? '✓' : `✗ expected ${expected}`;
+          console.log(`  ${sp.name}: ${sp.role} ${match}`);
         }
-        log('  All players see their role cards ✓');
-
-        // Host proceeds to night
-        await host.page.getByRole('button', { name: 'Proceed to Night' }).click();
-        log('  Host proceeded to night ✓');
       });
 
-      // ════════════════════════════════════════════════════════════════════
-      // GAME LOOP
-      // ════════════════════════════════════════════════════════════════════
-      let round = 0;
+      // ══════════════════════════════════════════════════════════════════
+      // STEP 6 — Start game
+      // ══════════════════════════════════════════════════════════════════
+      await test.step('Host starts game', async () => {
+        await host.page.getByRole('button', { name: 'Start Game' }).click();
+        console.log('  Game started ✓');
+      });
+
+      // ══════════════════════════════════════════════════════════════════
+      // STEP 7 — Role reveal
+      // ══════════════════════════════════════════════════════════════════
+      await test.step('Role reveal → proceed to night', async () => {
+        await Promise.all(
+          players.filter((p) => p.name !== 'Player0').map((p) => p.page.waitForSelector('text=Your Role', { timeout: 15_000 }))
+        );
+        console.log('\n🎭 Role reveal — each player\'s screen:');
+        for (const player of players.filter((p) => p.name !== 'Player0')) {
+          const roleText = await player.page.locator('text=Your Role').first().evaluate(
+            (el) => (el.closest('section,div,main') as HTMLElement)?.innerText ?? ''
+          ).catch(() => '');
+          const roleMatch = roleText.match(/(Wolf|Villager|wolf|villager)/i);
+          console.log(`  ${player.name} sees: ${roleMatch?.[0] ?? '(unknown)'}`);
+        }
+        await host.page.getByRole('button', { name: 'Proceed to Night' }).click();
+        console.log('  Host proceeded to night ✓');
+        logCounts('after role reveal');
+      });
+
+      // ══════════════════════════════════════════════════════════════════
+      // GAME LOOP — driven by SCENARIO
+      // ══════════════════════════════════════════════════════════════════
       let gameEnded = false;
 
-      while (!gameEnded && round < MAX_ROUNDS) {
-        round++;
+      const nightVictimByDay: Record<number, string> = {};
+      for (const e of SCENARIO) {
+        if ('night' in e) nightVictimByDay[e.night] = e.victim;
+      }
 
-        // ── Night Phase ──────────────────────────────────────────────────
-        await test.step(`Round ${round}: Night phase`, async () => {
-          log(`\n🌙 === Round ${round}: Night Phase ===`);
+      for (const event of SCENARIO) {
+        if (gameEnded) break;
 
-          // Wait for all players to enter night phase
-          await Promise.all(
-            players.map((p) => waitForPhase(p.page, 'Night falls', 25_000).catch(() => null))
-          );
+        if ('night' in event) {
+          // ── Night Phase ───────────────────────────────────────────────
+          await test.step(`Night ${event.night}: wolves kill ${event.victim}`, async () => {
+            logCounts(`Night ${event.night} start`);
+            console.log(`\n🌙 Night ${event.night}: killing ${event.victim}`);
 
-          // On first round, detect each player's role from the UI.
-          // "wolves voted" only appears in the wolf panel (after WebSocket state loads).
-          // We poll all 7 pages IN PARALLEL (max ~10s total) to avoid timing issues.
-          if (round === 1) {
-            log('  Detecting roles in parallel (polling for wolf indicator)...');
-            const roleResults = await Promise.all(
-              players.map((player) =>
-                player.page.evaluate(async (): Promise<boolean> => {
-                  // "wolves voted" text only renders in the wolf night panel
-                  for (let i = 0; i < 20; i++) {
-                    if (document.body.innerText.includes('wolves voted')) return true;
-                    await new Promise((r) => setTimeout(r, 500));
-                  }
-                  return false; // not a wolf after 10s
-                })
+            await Promise.all(
+              players.filter((p) => p.name !== 'Player0').map((p) =>
+                waitForAnyPhase(p.page, ['Night falls', 'Win'], 30_000).catch(() => null)
               )
             );
-            for (let i = 0; i < players.length; i++) {
-              players[i].role = roleResults[i] ? 'wolf' : 'villager';
-              log(`  ${players[i].name}: ${players[i].role} ${players[i].role === 'wolf' ? '🐺' : '🏡'}`);
-            }
-            const detectedWolves = players.filter((p) => p.role === 'wolf').length;
-            log(`  Detected ${detectedWolves} wolves (expected ${WOLF_COUNT})`);
-          }
+            if (isGameEnded(dead)) { gameEnded = true; return; }
 
-          // Wolves vote for the first available villager
-          const wolves = players.filter((p) => p.role === 'wolf');
-          for (const wolf of wolves) {
-            const hasVotePanel =
-              (await wolf.page.locator('text=Choose a player to eliminate').count()) > 0;
-            if (!hasVotePanel) {
-              log(`  ${wolf.name} (wolf) has no vote panel — likely eliminated`);
-              continue;
-            }
-            // Target: first enabled button in the wolf vote list
-            const targetBtns = wolf.page.locator('button').filter({ hasText: '🏡' });
-            const btnCount = await targetBtns.count();
-            if (btnCount > 0) {
-              // Find first enabled (not already voted)
+            for (const wolfName of wolves) {
+              if (dead.has(wolfName)) continue;
+              const wolfPage = getPage(wolfName);
+              const hasPanel = (await wolfPage.locator('text=Choose a player to eliminate').count()) > 0;
+              if (!hasPanel) { console.log(`  ${wolfName} — no vote panel, skipping`); continue; }
+
+              const allBtns = wolfPage.locator('button');
+              const btnCount = await allBtns.count();
               for (let i = 0; i < btnCount; i++) {
-                const btn = targetBtns.nth(i);
-                const disabled = await btn.getAttribute('disabled');
-                if (disabled === null) {
-                  const targetName = await btn.textContent();
+                const btn = allBtns.nth(i);
+                if (await btn.getAttribute('disabled') !== null) continue;
+                const txt = (await btn.textContent()) ?? '';
+                if (txt.includes(event.victim) && txt.includes('🏡')) {
                   await btn.click();
-                  log(`  ${wolf.name} (wolf) voted for: ${targetName?.trim()}`);
+                  console.log(`  ${wolfName} voted to kill ${event.victim} ✓`);
                   break;
                 }
               }
             }
-          }
 
-          // Give wolves a moment, then host force-resolves night
-          await host.page.waitForTimeout(2_000);
-          // Check if still in night phase before force-resolving
-          const stillNight = (await host.page.locator('h2:has-text("Night falls")').count()) > 0;
-          if (stillNight) {
-            const forceBtn = host.page.locator('button', { hasText: 'End Night' });
-            if ((await forceBtn.count()) > 0) {
-              await forceBtn.click();
-              log('  Host force-resolved night ✓');
-            } else {
-              log('  ⚠️ End Night button not found on host page');
-              const h2 = await host.page.locator('h2').first().textContent();
-              log(`  Host page shows: "${h2}"`);
-            }
-          } else {
-            log('  Night auto-resolved (all wolves voted)');
-          }
-
-          await host.page.screenshot({
-            path: `playwright-report/round${round}-after-night.png`,
-          });
-        });
-
-        // Check if game ended right after night
-        gameEnded = await isGameEnded(host.page);
-        if (gameEnded) {
-          log('  Game ended after night phase!');
-          break;
-        }
-
-        // ── Day Discussion Phase ─────────────────────────────────────────
-        await test.step(`Round ${round}: Day discussion`, async () => {
-          log(`\n☀️  Round ${round}: Day Discussion`);
-          await waitForPhase(host.page, 'Dawn breaks', 20_000);
-
-          // Read elimination announcement
-          const eliminated = await host.page
-            .locator('strong')
-            .filter({ hasText: /\w/ })
-            .first()
-            .textContent()
-            .catch(() => null);
-          if (eliminated) log(`  Last night: ${eliminated} was eliminated`);
-
-          // Host immediately triggers vote (skip discussion timer)
-          const startVoteBtn = host.page.getByRole('button', { name: 'Start Vote' });
-          if ((await startVoteBtn.count()) > 0) {
-            await startVoteBtn.click();
-            log('  Host started vote ✓');
-          }
-        });
-
-        // ── Day Vote Phase ───────────────────────────────────────────────
-        await test.step(`Round ${round}: Day vote`, async () => {
-          log(`\n🗳️  Round ${round}: Day Vote`);
-          await waitForPhase(host.page, 'Vote', 15_000);
-
-          // All alive players vote for first eligible candidate
-          await Promise.all(
-            players.map(async (player) => {
-              // Check we're in vote phase
-              const inVote =
-                (await player.page.locator('h2:has-text("Vote")').count()) > 0;
-              if (!inVote) return;
-
-              // Find first enabled button that isn't a control button
-              const allBtns = player.page.locator('button');
-              const btnCount = await allBtns.count();
-
-              for (let i = 0; i < btnCount; i++) {
-                const btn = allBtns.nth(i);
-                const disabled = await btn.getAttribute('disabled');
-                if (disabled !== null) continue;
-
-                const txt = (await btn.textContent()) ?? '';
-                // Skip control buttons (End Early, Leave, etc.)
-                if (
-                  txt.includes('End Early') ||
-                  txt.includes('Leave') ||
-                  txt.includes('You)') ||
-                  txt.trim() === ''
-                )
-                  continue;
-
-                await btn.click().catch(() => {});
-                log(`  ${player.name} voted`);
-                break;
+            await host.page.waitForTimeout(2_000);
+            const stillNight = (await host.page.locator('h2:has-text("Night falls")').count()) > 0;
+            if (stillNight) {
+              const forceBtn = host.page.locator('button', { hasText: 'End Night' });
+              if ((await forceBtn.count()) > 0) {
+                await forceBtn.click();
+                console.log('  Host force-ended night ✓');
               }
-            })
-          );
-
-          // Give auto-resolve a moment; if not resolved, host force-resolves
-          await host.page.waitForTimeout(2_000);
-          const forceDay = host.page.locator('button', { hasText: 'End Early' });
-          if ((await forceDay.count()) > 0) {
-            // Check still in vote phase (not auto-resolved yet)
-            const stillVoting =
-              (await host.page.locator('h2:has-text("Vote")').count()) > 0;
-            if (stillVoting) {
-              await forceDay.click();
-              log('  Host force-resolved vote ✓');
+            } else {
+              console.log('  Night auto-resolved ✓');
             }
-          }
-
-          await host.page.screenshot({
-            path: `playwright-report/round${round}-after-vote.png`,
           });
-        });
 
-        // Check if game ended after vote
-        gameEnded = await isGameEnded(host.page);
-        if (gameEnded) {
-          log('  Game ended after vote!');
-          break;
-        }
+        } else {
+          // ── Day Discussion Phase ──────────────────────────────────────
+          await test.step(`Day ${event.day}: discussion`, async () => {
+            logCounts(`Day ${event.day} start`);
+            if (isGameEnded(dead)) { gameEnded = true; return; }
 
-        // ── Day Defend Phase (optional) ──────────────────────────────────
-        await test.step(`Round ${round}: Defense phase (if any)`, async () => {
-          const defensePhase = await host.page
-            .waitForSelector('h2:has-text("Final Defense")', { timeout: 5_000 })
-            .catch(() => null);
+            const phase = await waitForAnyPhase(host.page, ['Dawn breaks', 'Win'], 30_000);
+            if (phase.includes('Win')) { gameEnded = true; return; }
 
-          if (!defensePhase) {
-            log('  No defense phase this round');
-            return;
-          }
+            const nightVictim = nightVictimByDay[event.day];
+            if (nightVictim) {
+              dead.add(nightVictim);
+              console.log(`  ${nightVictim} was killed last night — marked dead`);
+            }
 
-          log(`\n⚖️  Round ${round}: Defense Phase`);
+            const startVoteBtn = host.page.locator('button', { hasText: 'Start Vote' });
+            if ((await startVoteBtn.count()) > 0) {
+              await startVoteBtn.click();
+              console.log('  Host started vote ✓');
+            }
+          });
 
-          // Find the defender across all player tabs and have them skip
-          let defenderHandled = false;
-          for (const player of players) {
-            const isDefender =
-              (await player.page.locator('text=You are being voted out').count()) > 0;
-            if (isDefender) {
-              // Defender skips
-              const skipBtn = player.page.locator('button', { hasText: 'Skip' }).first();
+          if (gameEnded) break;
+
+          // ── Day Vote Phase ────────────────────────────────────────────
+          await test.step(`Day ${event.day}: vote → ${event.voted}`, async () => {
+            console.log(`\n🗳️  Day ${event.day}: voting out ${event.voted}`);
+
+            const votePhase = await waitForAnyPhase(host.page, ['Vote', 'Win'], 45_000);
+            if (votePhase.includes('Win')) { gameEnded = true; return; }
+
+            const primaryTarget = event.voted;
+            const fallback =
+              wolves.find((w) => w !== primaryTarget && !dead.has(w)) ??
+              villagers.find((v) => !dead.has(v))!;
+            console.log(`  Target: ${primaryTarget}, fallback for self: ${fallback}`);
+
+            // Exclude Player0 (host-only) and dead players
+            const alivePlayers = players.filter((p) => p.name !== 'Player0' && !dead.has(p.name));
+            await Promise.all(
+              alivePlayers.map(async (player) => {
+                const inVote = await player.page
+                  .waitForSelector('h2:has-text("Vote")', { timeout: 10_000 })
+                  .then(() => true).catch(() => false);
+                if (!inVote) return;
+
+                const targetName = player.name === primaryTarget ? fallback : primaryTarget;
+                const allBtns = player.page.locator('button');
+                const btnCount = await allBtns.count();
+                for (let i = 0; i < btnCount; i++) {
+                  const btn = allBtns.nth(i);
+                  if (await btn.getAttribute('disabled') !== null) continue;
+                  const txt = (await btn.textContent()) ?? '';
+                  if (
+                    txt.includes(targetName) &&
+                    !txt.includes('(You)') &&
+                    !txt.includes('End Early') &&
+                    !txt.includes('Leave') &&
+                    txt.trim() !== ''
+                  ) {
+                    await btn.click().catch(() => {});
+                    console.log(`  ${player.name} voted for ${targetName}`);
+                    break;
+                  }
+                }
+              })
+            );
+
+            await host.page.waitForTimeout(2_000);
+            const forceDay = host.page.locator('button', { hasText: 'End Early' });
+            if ((await forceDay.count()) > 0 && (await host.page.locator('h2:has-text("Vote")').count()) > 0) {
+              await forceDay.click();
+              console.log('  Host force-ended vote ✓');
+              await host.page
+                .waitForSelector('h2:has-text("Vote")', { state: 'hidden', timeout: 15_000 })
+                .catch(() => {});
+            }
+          });
+
+          if (gameEnded) break;
+
+          // ── Defense Phase ─────────────────────────────────────────────
+          await test.step(`Day ${event.day}: defense (${event.voted} defends, success=${event.is_defense_successful})`, async () => {
+            console.log(`\n⚖️  Day ${event.day}: defense for ${event.voted}`);
+
+            const afterVote = await waitForAnyPhase(
+              host.page, ['Final Defense', 'Night falls', 'Dawn breaks', 'Win'], 30_000
+            );
+            if (afterVote.includes('Win')) { gameEnded = true; return; }
+            if (!afterVote.includes('Final Defense')) {
+              console.log(`  No defense phase (phase: "${afterVote.trim()}")`);
+              return;
+            }
+
+            if (!event.is_defense_successful) {
+              const defenderPage = getPage(event.voted);
+              const skipBtn = defenderPage.locator('button', { hasText: 'Skip' }).first();
               if ((await skipBtn.count()) > 0) {
                 await skipBtn.click();
-                log(`  ${player.name} (defender) skipped defense`);
+                console.log(`  ${event.voted} skipped defense ✓`);
+              } else {
+                const hostSkip = host.page.locator('button', { hasText: 'Skip Defense' });
+                if ((await hostSkip.count()) > 0) {
+                  await hostSkip.click();
+                  console.log('  Host skipped defense (fallback) ✓');
+                }
               }
-              defenderHandled = true;
-              break;
+            } else {
+              console.log(`  Defense not skipped — waiting for auto-advance`);
             }
-          }
 
-          // Fallback: host skips if defender didn't handle it
-          if (!defenderHandled) {
-            const hostSkip = host.page.locator('button', { hasText: 'Skip Defense' });
-            if ((await hostSkip.count()) > 0) {
-              await hostSkip.click();
-              log('  Host skipped defense');
-            }
-          }
-        });
+            const afterDefend = await waitForAnyPhase(host.page, ['Wolves Win', 'Night falls', 'Dawn breaks'], 20_000);
+            console.log(`  After defense: "${afterDefend.trim()}"`);
+            if (afterDefend.includes('Wolves Win')) { gameEnded = true; return; }
 
-        // Final game-ended check before next round
-        gameEnded = await isGameEnded(host.page);
-      }
-
-      // ════════════════════════════════════════════════════════════════════
-      // FINAL VERIFICATION
-      // ════════════════════════════════════════════════════════════════════
-      await test.step('Verify game ended with a winner', async () => {
-        log('\n🏆 === Game Ended ===');
-        expect(gameEnded, 'Game should have ended within max rounds').toBe(true);
-
-        const winnerText = await getPhaseHeading(host.page);
-        log(`  Winner banner: "${winnerText}"`);
-        expect(winnerText).toMatch(/Win/);
-
-        // Screenshot end screen for all players
-        for (const player of players) {
-          const heading = await getPhaseHeading(player.page).catch(() => '');
-          log(`  ${player.name} sees: "${heading}"`);
-          await player.page.screenshot({
-            path: `playwright-report/end-${player.name}.png`,
+            dead.add(event.voted);
+            console.log(`  ${event.voted} eliminated → marked dead`);
+            logCounts(`Day ${event.day} after defense`);
           });
         }
+      }
 
-        // Verify wolves are revealed (end screen shows wolf names)
-        const wolvesPanel = await host.page.locator('text=The Wolves were:').count();
-        expect(wolvesPanel, 'Wolf reveal panel should be visible').toBeGreaterThan(0);
+      // ══════════════════════════════════════════════════════════════════
+      // FINAL VERIFICATION
+      // ══════════════════════════════════════════════════════════════════
+      await test.step(`Verify: ${EXPECTED_WINNER}`, async () => {
+        console.log('\n🏆 Waiting for winner banner...');
+        const winText = await waitForAnyPhase(host.page, ['Wolves Win'], 30_000);
+        console.log(`  Winner banner: "${winText.trim()}"`);
+        expect(winText, 'Wolves Win banner should be visible').toContain('Wolves Win');
 
-        // Host ends game (cleanup)
+        expect(
+          await host.page.locator('text=The Wolves were:').count(),
+          'Wolf reveal panel should be visible'
+        ).toBeGreaterThan(0);
+
         const endGameBtn = host.page.locator('button', { hasText: 'End Game' });
         if ((await endGameBtn.count()) > 0) {
           await endGameBtn.click();
-          log('  Host clicked End Game — room closed ✓');
+          console.log('  Host ended game ✓');
         }
       });
+
     } finally {
-      // Always close all browser contexts
-      log('\n🧹 Cleaning up browser contexts...');
       for (const player of players) {
         await player.ctx.close().catch(() => {});
+        await player.browser.close().catch(() => {});
       }
     }
   });

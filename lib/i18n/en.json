@@ -94,6 +94,7 @@
   "ww.vote": "Vote",
   "ww.voted": "Voted",
   "ww.forceNight": "End Night",
+  "ww.endNight": "End Night Phase",
 
   "ww.roleGuide": "Role Guide",
   "ww.roles": "Roles in this game",
@@ -107,12 +108,19 @@
   "ww.networkError": "Network error",
   "ww.connecting": "Connecting...",
   "ww.leaveRoom": "Leave",
+  "ww.eliminated": "You have been eliminated",
+  "ww.spectating": "Spectating the game...",
   "ww.loading": "Loading...",
+  "ww.redirecting": "Returning to home...",
   "ww.connected": "Connected",
   "ww.reconnecting": "Reconnecting...",
   "ww.required": "is required",
   "ww.endGame": "End Game",
   "ww.endGameHint": "Closes the room for all players",
+
+  "ww.role.host": "Host",
+  "ww.role.host.desc": "You are the Host. Moderate the game, control phase transitions, and watch the Game Log.",
+  "ww.role.host.goal": "Goal: Keep the game running smoothly",
 
   "ww.role.seer": "Seer",
   "ww.role.seer.desc": "Each night, secretly investigate one player to learn if they are a wolf.",
@@ -135,18 +143,6 @@
   "ww.defend.send": "Submit Defense",
   "ww.defend.skip": "Skip",
   "ww.defend.waiting": "Waiting for {name} to defend...",
-
-  "ww.witch.title": "Witch's Turn",
-  "ww.witch.save": "Save {name}",
-  "ww.witch.poison": "Poison someone",
-  "ww.witch.skip": "Do nothing tonight",
-  "ww.witch.usedHeal": "Heal potion already used",
-  "ww.witch.usedPoison": "Poison already used",
-
-  "ww.hunter.title": "Hunter's Last Shot",
-  "ww.hunter.subtitle": "{name} was eliminated — they get one last shot",
-  "ww.hunter.shoot": "Shoot",
-  "ww.hunter.waiting": "Waiting for {name} to shoot...",
 
   "ww.roleConfig": "Role Configuration",
   "ww.customRoles": "Custom Roles",

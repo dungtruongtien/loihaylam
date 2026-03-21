@@ -162,10 +162,10 @@ export default function NightPhase({ gameState, onSend }: Props) {
         </div>
       )}
 
-      {/* Host: force resolve */}
+      {/* Host: end night manually */}
       {isHost && (
-        <button className="btn ghost full" onClick={() => onSend('force_resolve_night')}>
-          {t('ww.forceNight')}
+        <button className="btn primary full" onClick={() => onSend('end_night')}>
+          {t('ww.endNight')}
         </button>
       )}
     </div>

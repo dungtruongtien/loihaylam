@@ -12,23 +12,51 @@ export function useWebSocket(roomId: string | null, playerId: string | null) {
   useEffect(() => {
     if (!roomId || !playerId) return;
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(`${protocol}//${window.location.host}/ws?roomId=${roomId}&playerId=${playerId}`);
+    setRoomClosed(false);
+    setGameState(null);
+    setError(null);
 
-    ws.onopen = () => { setConnected(true); setError(null); };
-    ws.onclose = () => { setConnected(false); };
-    ws.onerror = () => { setError('Connection lost. Please refresh.'); setConnected(false); };
-    ws.onmessage = (event) => {
-      try {
-        const msg = JSON.parse(event.data);
-        if (msg.type === 'state_update') setGameState(msg.payload);
-        if (msg.type === 'error') setError(msg.payload.message);
-        if (msg.type === 'room_closed') setRoomClosed(true);
-      } catch { /* ignore */ }
+    let cancelled = false;
+    let retryTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    function connect() {
+      if (cancelled) return;
+
+      let hadStateUpdate = false;
+      let intentionalClose = false;
+
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const ws = new WebSocket(`${protocol}//${window.location.host}/ws?roomId=${roomId}&playerId=${playerId}`);
+      wsRef.current = ws;
+
+      ws.onopen = () => { setConnected(true); setError(null); };
+      ws.onerror = () => { setConnected(false); };
+      ws.onclose = () => {
+        setConnected(false);
+        if (!cancelled && !intentionalClose) {
+          retryTimeout = setTimeout(connect, 3000);
+        }
+      };
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === 'state_update') { hadStateUpdate = true; setGameState(msg.payload); }
+          if (msg.type === 'error') {
+            if (!hadStateUpdate) { intentionalClose = true; setRoomClosed(true); }
+            else setError(msg.payload.message);
+          }
+          if (msg.type === 'room_closed') { intentionalClose = true; setRoomClosed(true); }
+        } catch { /* ignore */ }
+      };
+    }
+
+    connect();
+
+    return () => {
+      cancelled = true;
+      if (retryTimeout) clearTimeout(retryTimeout);
+      wsRef.current?.close();
     };
-
-    wsRef.current = ws;
-    return () => ws.close();
   }, [roomId, playerId]);
 
   const send = useCallback((type: string, payload: unknown = {}) => {

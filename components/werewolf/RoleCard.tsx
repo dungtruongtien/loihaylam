@@ -14,6 +14,7 @@ const ROLE_META: Record<string, { icon: string; color: string; bg: string }> = {
   witch: { icon: '🧙', color: '#059669', bg: 'linear-gradient(135deg,#064e3b,#065f46)' },
   bodyguard: { icon: '🛡', color: '#d97706', bg: 'linear-gradient(135deg,#78350f,#92400e)' },
   hunter: { icon: '🏹', color: '#0369a1', bg: 'linear-gradient(135deg,#0c4a6e,#075985)' },
+  host: { icon: '👑', color: '#b45309', bg: 'linear-gradient(135deg,#78350f,#b45309)' },
 };
 
 const DEFAULT_META = { icon: '🎭', color: 'var(--brand)', bg: 'linear-gradient(135deg,#1e3a5f,#1d4ed8)' };

@@ -10,15 +10,13 @@ interface Props {
 const ACTION_ICONS: Record<string, string> = {
   wolf_vote: '🐺',
   seer_investigate: '🔍',
+  seer_skip: '🔍',
   bodyguard_protect: '🛡',
-  witch_heal: '💊',
-  witch_poison: '☠️',
-  witch_poison_kill: '☠️',
+  bodyguard_skip: '🛡',
   defend: '🗣',
   day_vote: '🗳',
   day_vote_resolved: '⚖️',
   eliminated: '💀',
-  hunter_shoot: '🏹',
 };
 
 function formatEntry(entry: GameLogEntry): string {
@@ -30,15 +28,13 @@ function formatEntry(entry: GameLogEntry): string {
   switch (entry.action) {
     case 'wolf_vote': return `${icon} ${actor}voted to eliminate ${entry.targetName}`;
     case 'seer_investigate': return `${icon} ${actor}investigated ${entry.targetName}${detail}`;
+    case 'seer_skip': return `${icon} ${actor}skipped (no investigation)`;
     case 'bodyguard_protect': return `${icon} ${actor}protected ${entry.targetName}`;
-    case 'witch_heal': return `${icon} ${actor}healed ${entry.targetName}`;
-    case 'witch_poison': return `${icon} ${actor}poisoned ${entry.targetName}`;
-    case 'witch_poison_kill': return `${icon} ${entry.targetName} was poisoned`;
+    case 'bodyguard_skip': return `${icon} ${actor}skipped (no protection)`;
     case 'defend': return `${icon} ${actor}: "${entry.detail}"`;
     case 'day_vote': return `${icon} ${actor}voted for ${entry.targetName}`;
     case 'day_vote_resolved': return `${icon} Day vote: ${entry.targetName} convicted`;
     case 'eliminated': return `${icon} ${entry.targetName} was eliminated`;
-    case 'hunter_shoot': return `${icon} ${actor}shot ${entry.targetName}`;
     default: return `• ${actor}${target}${detail}`;
   }
 }
@@ -46,10 +42,8 @@ function formatEntry(entry: GameLogEntry): string {
 function phaseLabel(phase: string): string {
   const map: Record<string, string> = {
     night: '🌙 Night',
-    night_witch: '🧙 Witch',
     day_vote: '🗳 Day Vote',
     day_defend: '⚖️ Defense',
-    hunter_shoot: '🏹 Hunter',
   };
   return map[phase] || phase;
 }

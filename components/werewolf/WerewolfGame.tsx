@@ -5,11 +5,9 @@ import { useTranslation } from '@/lib/i18n/useTranslation';
 import Lobby from './Lobby';
 import RoleReveal from './RoleReveal';
 import NightPhase from './NightPhase';
-import NightWitch from './NightWitch';
 import DayPhase from './DayPhase';
 import VotePanel from './VotePanel';
 import DayDefend from './DayDefend';
-import HunterShoot from './HunterShoot';
 import ResultBanner from './ResultBanner';
 import GameLog from './GameLog';
 
@@ -158,11 +156,27 @@ export default function WerewolfGame() {
     );
   }
 
-  if (!gameState) return <div style={{ textAlign: 'center', padding: '3rem' }}>{t('ww.loading')}</div>;
+  if (!gameState) {
+    return (
+      <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>
+        <p style={{ color: 'var(--text-muted)' }}>{wsError ? wsError : t('ww.loading')}</p>
+        {wsError && (
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.5rem' }}>
+            {t('ww.redirecting')}
+          </p>
+        )}
+        <button className="btn ghost sm" style={{ marginTop: '1rem' }} onClick={clearSession}>
+          {t('ww.leaveRoom')}
+        </button>
+      </div>
+    );
+  }
 
   const phase = gameState.room.phase;
   const myRole = gameState.myRole;
-  const myName = gameState.players.find((p) => p.isMe)?.name;
+  const me = gameState.players.find((p) => p.isMe);
+  const myName = me?.name;
+  const isAlive = me?.isAlive ?? true;
   const showIdentityBar = phase !== 'lobby' && myRole !== null;
 
   return (
@@ -185,18 +199,18 @@ export default function WerewolfGame() {
       {showIdentityBar && myRole && myName && (
         <div style={{
           position: 'sticky', top: 92, zIndex: 49,
-          background: myRole === 'wolf' ? 'rgba(127,29,29,0.6)' : 'rgba(30,58,95,0.6)',
-          borderBottom: `1px solid ${myRole === 'wolf' ? 'rgba(239,68,68,0.25)' : 'rgba(59,130,246,0.25)'}`,
+          background: myRole === 'wolf' ? 'rgba(127,29,29,0.6)' : myRole === 'host' ? 'rgba(120,53,15,0.6)' : 'rgba(30,58,95,0.6)',
+          borderBottom: `1px solid ${myRole === 'wolf' ? 'rgba(239,68,68,0.25)' : myRole === 'host' ? 'rgba(180,83,9,0.25)' : 'rgba(59,130,246,0.25)'}`,
           backdropFilter: 'blur(8px)',
           padding: '0.4rem 1rem',
           display: 'flex', alignItems: 'center', gap: '0.5rem',
           fontSize: '0.85rem', fontWeight: 700,
         }}>
-          <span>{myRole === 'wolf' ? '🐺' : myRole === 'seer' ? '🔮' : myRole === 'witch' ? '🧙' : myRole === 'bodyguard' ? '🛡' : myRole === 'hunter' ? '🏹' : '🏡'}</span>
+          <span>{myRole === 'wolf' ? '🐺' : myRole === 'host' ? '👑' : myRole === 'seer' ? '🔮' : myRole === 'witch' ? '🧙' : myRole === 'bodyguard' ? '🛡' : myRole === 'hunter' ? '🏹' : '🏡'}</span>
           <span style={{ color: '#fff' }}>{myName}</span>
           <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 400 }}>•</span>
-          <span style={{ color: myRole === 'wolf' ? '#fca5a5' : '#93c5fd' }}>
-            {['wolf','villager','seer','witch','bodyguard','hunter'].includes(myRole) ? t(`ww.role.${myRole}`) : myRole}
+          <span style={{ color: myRole === 'wolf' ? '#fca5a5' : myRole === 'host' ? '#fcd34d' : '#93c5fd' }}>
+            {['wolf','villager','seer','witch','bodyguard','hunter','host'].includes(myRole) ? t(`ww.role.${myRole}`) : myRole}
           </span>
         </div>
       )}
@@ -209,13 +223,18 @@ export default function WerewolfGame() {
 
       {phase === 'lobby' && <Lobby gameState={gameState} myPlayerId={playerId} onSend={send} />}
       {phase === 'role_reveal' && <RoleReveal gameState={gameState} onSend={send} />}
-      {phase === 'night' && <NightPhase gameState={gameState} onSend={send} />}
-      {phase === 'night_witch' && <NightWitch gameState={gameState} onSend={send} />}
-      {phase === 'day_discuss' && <DayPhase gameState={gameState} onSend={send} />}
-      {phase === 'day_vote' && <VotePanel gameState={gameState} onSend={send} />}
-      {phase === 'day_defend' && <DayDefend gameState={gameState} onSend={send} />}
-      {phase === 'hunter_shoot' && <HunterShoot gameState={gameState} onSend={send} />}
       {phase === 'ended' && <ResultBanner gameState={gameState} onSend={send} />}
+      {phase !== 'ended' && phase !== 'lobby' && phase !== 'role_reveal' && !isAlive && (
+        <div style={{ maxWidth: 480, margin: '0 auto', padding: '3rem 1rem', textAlign: 'center' }}>
+          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>💀</div>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.5rem' }}>{t('ww.eliminated')}</h2>
+          <p style={{ color: 'var(--text-muted)' }}>{t('ww.spectating')}</p>
+        </div>
+      )}
+      {isAlive && phase === 'night' && <NightPhase gameState={gameState} onSend={send} />}
+      {isAlive && phase === 'day_discuss' && <DayPhase gameState={gameState} onSend={send} />}
+      {isAlive && phase === 'day_vote' && <VotePanel gameState={gameState} onSend={send} />}
+      {isAlive && phase === 'day_defend' && <DayDefend gameState={gameState} onSend={send} />}
 
       {/* Host-only game log — shown during all active phases */}
       {gameState.players.find((p) => p.isMe)?.isHost && phase !== 'lobby' && phase !== 'role_reveal' && (
