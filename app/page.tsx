@@ -10,9 +10,15 @@ export const metadata: Metadata = {
     title: 'Boardgame.sh — Free Online Group Games',
     description: 'Truth or Dare, Werewolf and more fun party games. Free, no sign-up!',
     url: 'https://boardgame.sh',
-    images: [{ url: '/cover.png' }],
+    images: [{ url: '/opengraph-image', width: 1200, height: 630 }],
   },
   alternates: { canonical: 'https://boardgame.sh' },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Boardgame.sh — Free Online Group Games',
+    description: 'Truth or Dare, Werewolf and more fun party games. Free, no sign-up!',
+    images: ['/opengraph-image'],
+  },
 };
 
 export default function HomePage() {

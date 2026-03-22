@@ -30,9 +30,8 @@ export function useI18nProvider(): I18nContextValue {
   useEffect(() => {
     const saved = localStorage.getItem('lang') as Lang | null;
     if (saved === 'en' || saved === 'vi') { setLangState(saved); return; }
-    // Default to English; switch to Vietnamese only if browser is explicitly Vietnamese
-    const browser = navigator.language?.toLowerCase() || '';
-    setLangState(browser.startsWith('vi') ? 'vi' : 'en');
+    // Default to English for all users unless explicitly set
+    setLangState('en');
   }, []);
 
   const setLang = useCallback((l: Lang) => {

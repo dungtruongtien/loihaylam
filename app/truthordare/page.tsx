@@ -11,9 +11,15 @@ export const metadata: Metadata = {
     title: 'Truth or Dare Online — Free Card Game | Boardgame.sh',
     description: '67+ truth and dare challenges. Free, no sign-up, play instantly in your browser.',
     url: 'https://boardgame.sh/truthordare',
-    images: [{ url: '/cover.png' }],
+    images: [{ url: '/opengraph-image', width: 1200, height: 630 }],
   },
   alternates: { canonical: 'https://boardgame.sh/truthordare' },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Truth or Dare Online — Free Card Game | Boardgame.sh',
+    description: '67+ truth and dare challenges. Free, no sign-up, play instantly in your browser.',
+    images: ['/opengraph-image'],
+  },
 };
 
 const HOW_TO_PLAY = [

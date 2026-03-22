@@ -4,10 +4,14 @@ import './globals.css';
 import { I18nProvider } from '@/components/I18nProvider';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://boardgame.sh'),
-  title: { default: 'Boardgame.sh — Trò Chơi Nhóm Online Miễn Phí', template: '%s | Boardgame.sh' },
-  description: 'Chơi Truth or Dare, Ma Sói và nhiều trò chơi nhóm vui nhộn miễn phí. Không cần đăng ký, chơi ngay trên trình duyệt!',
-  openGraph: { type: 'website', siteName: 'Boardgame.sh', locale: 'vi_VN' },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://boardgame.sh'),
+  title: { default: 'Boardgame.sh — Free Online Group Games', template: '%s | Boardgame.sh' },
+  description: 'Play Truth or Dare, Werewolf (Ma Sói) and more free online group games. No sign-up needed — play instantly in your browser!',
+  openGraph: { type: 'website', siteName: 'Boardgame.sh', locale: 'en_US' },
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
 };
 
 export const viewport = {
@@ -16,7 +20,7 @@ export const viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="vi">
+    <html lang="en">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />

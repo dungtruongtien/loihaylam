@@ -6,14 +6,20 @@ import WerewolfGame from '@/components/werewolf/WerewolfGame';
 export const metadata: Metadata = {
   title: 'Werewolf Online — Free Multiplayer Social Deduction Game | Boardgame.sh',
   description: 'Play Werewolf (Ma Sói) online free with friends. Create a room, get a secret role, discuss and vote. No sign-up, works on any device.',
-  keywords: ['werewolf online', 'ma soi online', 'social deduction game', 'multiplayer party game', 'werewolf game', 'online board game'],
+  keywords: ['werewolf online multiplayer', 'play werewolf online free', 'werewolf game no download', 'ma sói online miễn phí', 'social deduction game browser', 'werewolf online', 'ma soi online'],
   openGraph: {
     title: 'Werewolf Online — Free Multiplayer Game | Boardgame.sh',
     description: 'Who is the Wolf? Discuss, deduce, and vote. Free multiplayer — no sign-up needed.',
     url: 'https://boardgame.sh/werewolf',
-    images: [{ url: '/cover.png' }],
+    images: [{ url: '/werewolf/opengraph-image', width: 1200, height: 630 }],
   },
   alternates: { canonical: 'https://boardgame.sh/werewolf' },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Werewolf Online — Free Multiplayer Game | Boardgame.sh',
+    description: 'Who is the Wolf? Discuss, deduce, and vote. Free multiplayer — no sign-up needed.',
+    images: ['/werewolf/opengraph-image'],
+  },
 };
 
 const HOW_TO_PLAY = [
@@ -59,6 +65,16 @@ export default function WerewolfPage() {
         url: 'https://boardgame.sh/werewolf',
         genre: 'Social Deduction',
         numberOfPlayers: { '@type': 'QuantitativeValue', minValue: 3, maxValue: 20 },
+      })}} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareApplication',
+        name: 'Werewolf Online',
+        applicationCategory: 'GameApplication',
+        operatingSystem: 'Web Browser',
+        url: 'https://boardgame.sh/werewolf',
+        offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+        description: 'Free multiplayer Werewolf game. No download, no sign-up. Play instantly in your browser.',
       })}} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org',
