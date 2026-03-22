@@ -22,6 +22,7 @@ export default function Lobby({ gameState, myPlayerId, onSend }: Props) {
   const [showRoleConfig, setShowRoleConfig] = useState(false);
   const [wolfCount, setWolfCount] = useState(room.wolfCount ?? 1);
   const [discSecs, setDiscSecs] = useState(room.discussionSeconds ?? 60);
+  const [gameMode, setGameMode] = useState<'phase' | 'reveal'>(room.gameMode ?? 'phase');
 
   // Role config state
   const [roleConfig, setRoleConfig] = useState<RoleConfig>(
@@ -29,6 +30,7 @@ export default function Lobby({ gameState, myPlayerId, onSend }: Props) {
   );
   const [newRoleName, setNewRoleName] = useState('');
   const [newRoleDesc, setNewRoleDesc] = useState('');
+  const [newRoleActions, setNewRoleActions] = useState('');
 
   const maxWolves = Math.floor((players.length - 1) / 2) || 1;
 
@@ -39,7 +41,7 @@ export default function Lobby({ gameState, myPlayerId, onSend }: Props) {
   };
 
   const applySettings = () => {
-    onSend('update_settings', { wolfCount, discussionSeconds: discSecs });
+    onSend('update_settings', { wolfCount, discussionSeconds: discSecs, gameMode });
     setShowSettings(false);
   };
 
@@ -55,13 +57,15 @@ export default function Lobby({ gameState, myPlayerId, onSend }: Props) {
 
   const addCustomRole = () => {
     if (!newRoleName.trim()) return;
+    const actions = newRoleActions.split(',').map((a) => a.trim()).filter(Boolean);
     const updated = {
       ...roleConfig,
-      customRoles: [...roleConfig.customRoles, { name: newRoleName.trim(), desc: newRoleDesc.trim() }],
+      customRoles: [...roleConfig.customRoles, { name: newRoleName.trim(), desc: newRoleDesc.trim(), actions: actions.length ? actions : undefined }],
     };
     updateAndSendRoleConfig(updated);
     setNewRoleName('');
     setNewRoleDesc('');
+    setNewRoleActions('');
   };
 
   const removeCustomRole = (idx: number) => {
@@ -150,6 +154,23 @@ export default function Lobby({ gameState, myPlayerId, onSend }: Props) {
                     </p>
                   )}
                 </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem' }}>
+                    Game Mode
+                  </label>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    {(['phase', 'reveal'] as const).map((mode) => (
+                      <button key={mode} onClick={() => setGameMode(mode)}
+                        className={gameMode === mode ? 'btn primary sm' : 'btn ghost sm'}
+                        style={{ flex: 1 }}>
+                        {mode === 'phase' ? '🌙 Phase Mode' : '🃏 Reveal Mode'}
+                      </button>
+                    ))}
+                  </div>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>
+                    {gameMode === 'phase' ? 'Day/night phases with timer — app manages the game flow.' : 'Roles revealed only — players manage the game themselves.'}
+                  </p>
+                </div>
                 <button className="btn primary" onClick={applySettings}>✓ {t('ww.apply')}</button>
               </div>
             )}
@@ -201,12 +222,19 @@ export default function Lobby({ gameState, myPlayerId, onSend }: Props) {
                     </p>
                   )}
                   {roleConfig.customRoles.map((r, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem', background: 'var(--panel2)', borderRadius: 8, padding: '0.5rem 0.75rem' }}>
-                      <div style={{ flex: 1 }}>
-                        <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{r.name}</span>
-                        {r.desc && <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)' }}>{r.desc}</span>}
+                    <div key={i} style={{ marginBottom: '0.4rem', background: 'var(--panel2)', borderRadius: 8, padding: '0.5rem 0.75rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <div style={{ flex: 1 }}>
+                          <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{r.name}</span>
+                          {r.desc && <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)' }}>{r.desc}</span>}
+                          {r.actions && r.actions.length > 0 && (
+                            <span style={{ display: 'block', fontSize: '0.7rem', color: 'var(--brand)', marginTop: '0.2rem' }}>
+                              Actions: {r.actions.join(', ')}
+                            </span>
+                          )}
+                        </div>
+                        <button className="btn ghost sm" onClick={() => removeCustomRole(i)} style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', flexShrink: 0 }}>✕</button>
                       </div>
-                      <button className="btn ghost sm" onClick={() => removeCustomRole(i)} style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}>✕</button>
                     </div>
                   ))}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}>
@@ -214,6 +242,8 @@ export default function Lobby({ gameState, myPlayerId, onSend }: Props) {
                       onChange={(e) => setNewRoleName(e.target.value)} />
                     <input className="input" placeholder={t('ww.roleDescPlaceholder')} value={newRoleDesc}
                       onChange={(e) => setNewRoleDesc(e.target.value)} />
+                    <input className="input" placeholder='Actions (comma-separated, e.g. "Inspect, Curse")' value={newRoleActions}
+                      onChange={(e) => setNewRoleActions(e.target.value)} />
                     <button className="btn ghost sm" onClick={addCustomRole} disabled={!newRoleName.trim()}>
                       + {t('ww.addCustomRole')}
                     </button>

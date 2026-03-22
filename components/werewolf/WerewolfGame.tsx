@@ -10,6 +10,7 @@ import VotePanel from './VotePanel';
 import DayDefend from './DayDefend';
 import ResultBanner from './ResultBanner';
 import GameLog from './GameLog';
+import RevealMode from './RevealMode';
 
 const ROOM_KEY = 'ww_room_id';
 const PLAYER_KEY = 'ww_player_id';
@@ -27,6 +28,7 @@ export default function WerewolfGame() {
   const [formError, setFormError] = useState<string | null>(null);
 
   const { gameState, connected, error: wsError, send, roomClosed } = useWebSocket(roomId, playerId);
+  const [actionToast, setActionToast] = useState<string | null>(null);
 
   useEffect(() => { if (roomClosed) clearSession(); }, [roomClosed]);
 
@@ -173,11 +175,25 @@ export default function WerewolfGame() {
   }
 
   const phase = gameState.room.phase;
+  const gameMode = gameState.room.gameMode;
   const myRole = gameState.myRole;
   const me = gameState.players.find((p) => p.isMe);
   const myName = me?.name;
   const isAlive = me?.isAlive ?? true;
   const showIdentityBar = phase !== 'lobby' && myRole !== null;
+
+  // Custom role actions for this player
+  const customRoleActions = (() => {
+    if (!myRole || phase === 'lobby' || phase === 'ended') return null;
+    const customRole = gameState.room.roleConfig.customRoles.find((r) => r.name === myRole);
+    return customRole?.actions?.length ? customRole.actions : null;
+  })();
+
+  const fireCustomAction = (actionName: string) => {
+    send('custom_action', { actionName });
+    setActionToast(`"${actionName}" logged to host`);
+    setTimeout(() => setActionToast(null), 2500);
+  };
 
   return (
     <div>
@@ -224,6 +240,30 @@ export default function WerewolfGame() {
       {phase === 'lobby' && <Lobby gameState={gameState} myPlayerId={playerId} onSend={send} />}
       {phase === 'role_reveal' && <RoleReveal gameState={gameState} onSend={send} />}
       {phase === 'ended' && <ResultBanner gameState={gameState} onSend={send} />}
+
+      {/* Reveal mode: show role card for all active phases instead of game phases */}
+      {gameMode === 'reveal' && phase !== 'lobby' && phase !== 'role_reveal' && phase !== 'ended' && (
+        <RevealMode gameState={gameState} onSend={send} />
+      )}
+
+      {/* Custom role action buttons — shown during active game phases */}
+      {customRoleActions && isAlive && gameMode !== 'reveal' && phase !== 'ended' && (
+        <div style={{ maxWidth: 480, margin: '0 auto', padding: '0.75rem 1rem' }}>
+          <div style={{ background: 'var(--panel)', border: '1px solid var(--border)', borderRadius: 12, padding: '0.75rem 1rem' }}>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem', fontWeight: 600 }}>Your Actions</p>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              {customRoleActions.map((action) => (
+                <button key={action} className="btn wolf sm" onClick={() => fireCustomAction(action)}>
+                  {action}
+                </button>
+              ))}
+            </div>
+          </div>
+          {actionToast && (
+            <p style={{ fontSize: '0.8rem', color: 'var(--truth)', marginTop: '0.4rem', textAlign: 'center' }}>✓ {actionToast}</p>
+          )}
+        </div>
+      )}
       {phase !== 'ended' && phase !== 'lobby' && phase !== 'role_reveal' && !isAlive && (
         <div style={{ maxWidth: 480, margin: '0 auto', padding: '3rem 1rem', textAlign: 'center' }}>
           <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>💀</div>

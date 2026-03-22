@@ -37,7 +37,12 @@ export default function RoleReveal({ gameState, onSend }: Props) {
         </div>
       )}
 
-      {isHost && (
+      {isHost && gameState.room.gameMode === 'reveal' && (
+        <button className="btn wolf full" onClick={() => onSend('end_game')}>
+          🃏 End Session
+        </button>
+      )}
+      {isHost && gameState.room.gameMode !== 'reveal' && (
         <button className="btn primary full" onClick={() => onSend('advance_to_night')}>
           {t('ww.proceedToNight')} 🌙
         </button>

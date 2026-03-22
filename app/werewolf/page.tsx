@@ -4,19 +4,19 @@ import SiteHeader from '@/components/SiteHeader';
 import WerewolfGame from '@/components/werewolf/WerewolfGame';
 
 export const metadata: Metadata = {
-  title: 'Werewolf Online — Free Multiplayer Social Deduction Game | Boardgame.sh',
+  title: 'Werewolf Online — Free Multiplayer Social Deduction Game | Broadgame.app',
   description: 'Play Werewolf (Ma Sói) online free with friends. Create a room, get a secret role, discuss and vote. No sign-up, works on any device.',
   keywords: ['werewolf online multiplayer', 'play werewolf online free', 'werewolf game no download', 'ma sói online miễn phí', 'social deduction game browser', 'werewolf online', 'ma soi online'],
   openGraph: {
-    title: 'Werewolf Online — Free Multiplayer Game | Boardgame.sh',
+    title: 'Werewolf Online — Free Multiplayer Game | Broadgame.app',
     description: 'Who is the Wolf? Discuss, deduce, and vote. Free multiplayer — no sign-up needed.',
-    url: 'https://boardgame.sh/werewolf',
+    url: 'https://broadgame.app/werewolf',
     images: [{ url: '/werewolf/opengraph-image', width: 1200, height: 630 }],
   },
-  alternates: { canonical: 'https://boardgame.sh/werewolf' },
+  alternates: { canonical: 'https://broadgame.app/werewolf' },
   twitter: {
     card: 'summary_large_image',
-    title: 'Werewolf Online — Free Multiplayer Game | Boardgame.sh',
+    title: 'Werewolf Online — Free Multiplayer Game | Broadgame.app',
     description: 'Who is the Wolf? Discuss, deduce, and vote. Free multiplayer — no sign-up needed.',
     images: ['/werewolf/opengraph-image'],
   },
@@ -60,9 +60,9 @@ export default function WerewolfPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'Game',
-        name: 'Werewolf Online — Boardgame.sh',
+        name: 'Werewolf Online — Broadgame.app',
         description: 'Free online multiplayer Werewolf game. Create a room, get secret roles, discuss and vote to eliminate wolves.',
-        url: 'https://boardgame.sh/werewolf',
+        url: 'https://broadgame.app/werewolf',
         genre: 'Social Deduction',
         numberOfPlayers: { '@type': 'QuantitativeValue', minValue: 3, maxValue: 20 },
       })}} />
@@ -72,7 +72,7 @@ export default function WerewolfPage() {
         name: 'Werewolf Online',
         applicationCategory: 'GameApplication',
         operatingSystem: 'Web Browser',
-        url: 'https://boardgame.sh/werewolf',
+        url: 'https://broadgame.app/werewolf',
         offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
         description: 'Free multiplayer Werewolf game. No download, no sign-up. Play instantly in your browser.',
       })}} />
@@ -87,7 +87,7 @@ export default function WerewolfPage() {
       })}} />
 
       {/* Hero */}
-      <section style={{ background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)', padding: '3rem 1rem 2rem' }}>
+      <section style={{ background: 'linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%)', padding: '3rem 1rem 2rem' }}>
         <div className="container" style={{ textAlign: 'center' }}>
           <h1 style={{ fontSize: 'clamp(1.8rem,4vw,2.5rem)', fontWeight: 800, marginBottom: '0.5rem' }}>
             🐺 Werewolf Online
@@ -120,7 +120,7 @@ export default function WerewolfPage() {
         </section>
 
         {/* Roles */}
-        <section style={{ padding: '3rem 1rem', borderTop: '1px solid var(--border)', background: '#fef2f2' }}>
+        <section style={{ padding: '3rem 1rem', borderTop: '1px solid var(--border)', background: '#f5f3ff' }}>
           <div className="container">
             <h2 style={{ textAlign: 'center', fontWeight: 800, fontSize: '1.5rem', marginBottom: '2rem' }}>Roles Guide</h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
@@ -177,7 +177,7 @@ export default function WerewolfPage() {
       </main>
 
       <footer className="site-footer">
-        <p><Link href="/privacy">Privacy Policy</Link> &nbsp;·&nbsp; © 2025 Boardgame.sh</p>
+        <p><Link href="/privacy">Privacy Policy</Link> &nbsp;·&nbsp; © 2025 Broadgame.app</p>
       </footer>
     </>
   );

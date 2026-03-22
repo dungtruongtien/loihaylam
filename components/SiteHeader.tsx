@@ -9,7 +9,7 @@ export default function SiteHeader() {
       <div className="header-inner">
         <Link href="/" className="brand">
           <span className="logo">🎲</span>
-          <span>Boardgame.sh</span>
+          <span>Broadgame.app</span>
         </Link>
         <nav className="nav">
           <Link href="/" className="nav-link">{t('nav.games')}</Link>

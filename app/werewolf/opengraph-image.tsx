@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
-export const alt = 'Werewolf Online — Free Multiplayer Game | Boardgame.sh';
+export const alt = 'Werewolf Online — Free Multiplayer Game | Broadgame.app';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -10,7 +10,7 @@ export default function Image() {
     (
       <div
         style={{
-          background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 50%, #fca5a5 100%)',
+          background: 'linear-gradient(135deg, #ede9fe 0%, #ddd6fe 50%, #c4b5fd 100%)',
           width: '100%',
           height: '100%',
           display: 'flex',
@@ -30,7 +30,7 @@ export default function Image() {
           Secret roles · Social deduction · Free multiplayer
         </div>
         <div style={{ fontSize: 22, opacity: 0.6, marginTop: 24 }}>
-          boardgame.sh/werewolf — No sign-up needed
+          broadgame.app/werewolf — No sign-up needed
         </div>
       </div>
     ),

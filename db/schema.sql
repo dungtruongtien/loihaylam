@@ -20,7 +20,8 @@ CREATE TABLE IF NOT EXISTS rooms (
   defend_ends_at INTEGER,
   hunter_id TEXT,
   pre_hunter_phase TEXT,
-  game_log TEXT NOT NULL DEFAULT '[]'
+  game_log TEXT NOT NULL DEFAULT '[]',
+  game_mode TEXT NOT NULL DEFAULT 'phase'
 );
 
 CREATE TABLE IF NOT EXISTS players (

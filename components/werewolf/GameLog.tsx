@@ -17,6 +17,7 @@ const ACTION_ICONS: Record<string, string> = {
   day_vote: '🗳',
   day_vote_resolved: '⚖️',
   eliminated: '💀',
+  custom_action: '⚡',
 };
 
 function formatEntry(entry: GameLogEntry): string {
@@ -35,6 +36,7 @@ function formatEntry(entry: GameLogEntry): string {
     case 'day_vote': return `${icon} ${actor}voted for ${entry.targetName}`;
     case 'day_vote_resolved': return `${icon} Day vote: ${entry.targetName} convicted`;
     case 'eliminated': return `${icon} ${entry.targetName} was eliminated`;
+    case 'custom_action': return `${icon} ${actor}used action: ${entry.detail}`;
     default: return `• ${actor}${target}${detail}`;
   }
 }

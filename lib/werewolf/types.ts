@@ -15,7 +15,7 @@ export interface RoleConfig {
   witch: number;
   bodyguard: number;
   hunter: number;
-  customRoles: Array<{ name: string; desc: string }>;
+  customRoles: Array<{ name: string; desc: string; actions?: string[] }>;
 }
 
 export interface GameLogEntry {
@@ -48,6 +48,7 @@ export interface RoomView {
   defendMessage: string | null;
   defendEndsAt: number | null;
   roleConfig: RoleConfig;
+  gameMode: 'phase' | 'reveal';
 }
 
 export interface GameState {

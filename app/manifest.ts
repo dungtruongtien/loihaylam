@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Boardgame.sh',
+    name: 'Broadgame.app',
     short_name: 'Boardgame',
     description: 'Free online party games — Truth or Dare, Werewolf, and more.',
     start_url: '/',

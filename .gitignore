@@ -1,6 +1,7 @@
 .vercel
 node_modules
 .next
+tsconfig.tsbuildinfo
 data/
 *.db
 .env

@@ -4,19 +4,19 @@ import SiteHeader from '@/components/SiteHeader';
 import TruthOrDareGame from '@/components/truthordare/TruthOrDareGame';
 
 export const metadata: Metadata = {
-  title: 'Truth or Dare Online — Free Card Game | Boardgame.sh',
+  title: 'Truth or Dare Online — Free Card Game | Broadgame.app',
   description: 'Play Truth or Dare free in your browser with friends. 67+ questions and challenges, no sign-up required. Perfect for parties, team building, and birthdays.',
   keywords: ['truth or dare', 'truth or dare online', 'party game', 'card game', 'team building game', 'dare questions'],
   openGraph: {
-    title: 'Truth or Dare Online — Free Card Game | Boardgame.sh',
+    title: 'Truth or Dare Online — Free Card Game | Broadgame.app',
     description: '67+ truth and dare challenges. Free, no sign-up, play instantly in your browser.',
-    url: 'https://boardgame.sh/truthordare',
+    url: 'https://broadgame.app/truthordare',
     images: [{ url: '/opengraph-image', width: 1200, height: 630 }],
   },
-  alternates: { canonical: 'https://boardgame.sh/truthordare' },
+  alternates: { canonical: 'https://broadgame.app/truthordare' },
   twitter: {
     card: 'summary_large_image',
-    title: 'Truth or Dare Online — Free Card Game | Boardgame.sh',
+    title: 'Truth or Dare Online — Free Card Game | Broadgame.app',
     description: '67+ truth and dare challenges. Free, no sign-up, play instantly in your browser.',
     images: ['/opengraph-image'],
   },
@@ -53,9 +53,9 @@ export default function TruthOrDarePage() {
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
           '@context': 'https://schema.org',
           '@type': 'Game',
-          name: 'Truth or Dare — Boardgame.sh',
+          name: 'Truth or Dare — Broadgame.app',
           description: 'Free online Truth or Dare card game. 67+ questions and challenges for groups of 2–20 players.',
-          url: 'https://boardgame.sh/truthordare',
+          url: 'https://broadgame.app/truthordare',
           genre: 'Party Game',
           numberOfPlayers: { '@type': 'QuantitativeValue', minValue: 2, maxValue: 20 },
         })}} />
@@ -105,7 +105,7 @@ export default function TruthOrDarePage() {
         {/* Features */}
         <section style={{ padding: '3rem 1rem', borderTop: '1px solid var(--border)' }}>
           <div className="container">
-            <h2 style={{ textAlign: 'center', fontWeight: 800, fontSize: '1.5rem', marginBottom: '2rem' }}>Why Play on Boardgame.sh?</h2>
+            <h2 style={{ textAlign: 'center', fontWeight: 800, fontSize: '1.5rem', marginBottom: '2rem' }}>Why Play on Broadgame.app?</h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '1.25rem', textAlign: 'center' }}>
               {FEATURES.map((f) => (
                 <div key={f.title} className="panel">
@@ -142,7 +142,7 @@ export default function TruthOrDarePage() {
         </section>
       </main>
       <footer className="site-footer">
-        <p><Link href="/privacy">Privacy Policy</Link> &nbsp;·&nbsp; © 2025 Boardgame.sh</p>
+        <p><Link href="/privacy">Privacy Policy</Link> &nbsp;·&nbsp; © 2025 Broadgame.app</p>
       </footer>
     </>
   );

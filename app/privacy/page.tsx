@@ -4,7 +4,7 @@ import SiteHeader from '@/components/SiteHeader';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
-  description: 'Privacy policy for Boardgame.sh.',
+  description: 'Privacy policy for Broadgame.app.',
 };
 
 export default function PrivacyPage() {
@@ -22,7 +22,7 @@ export default function PrivacyPage() {
         <Link href="/" style={{ display: 'inline-block', marginTop: '2rem' }}>← Back to games</Link>
       </main>
       <footer className="site-footer">
-        <p>© 2025 Boardgame.sh</p>
+        <p>© 2025 Broadgame.app</p>
       </footer>
     </>
   );

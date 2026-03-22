@@ -2,12 +2,13 @@ import type { Metadata } from 'next';
 import Script from 'next/script';
 import './globals.css';
 import { I18nProvider } from '@/components/I18nProvider';
+import ReportButton from '@/components/ReportButton';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://boardgame.sh'),
-  title: { default: 'Boardgame.sh — Free Online Group Games', template: '%s | Boardgame.sh' },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://broadgame.app'),
+  title: { default: 'Broadgame.app — Free Online Group Games', template: '%s | Broadgame.app' },
   description: 'Play Truth or Dare, Werewolf (Ma Sói) and more free online group games. No sign-up needed — play instantly in your browser!',
-  openGraph: { type: 'website', siteName: 'Boardgame.sh', locale: 'en_US' },
+  openGraph: { type: 'website', siteName: 'Broadgame.app', locale: 'en_US' },
   icons: {
     icon: '/favicon.ico',
     apple: '/apple-touch-icon.png',
@@ -24,12 +25,28 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+        {/* display=optional: browser uses system font immediately, loads Inter in background — eliminates font-caused LCP delay */}
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=optional" rel="stylesheet" />
+        {/* Google tag (gtag.js) */}
+        {process.env.NEXT_PUBLIC_GA_ID && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
+              strategy="afterInteractive"
+            />
+            <Script id="ga4-init" strategy="afterInteractive">{`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}');
+            `}</Script>
+          </>
+        )}
+        {/* lazyOnload: AdSense loads only after all page content is done — doesn't block LCP/FCP */}
         <Script
-          async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5200581180131547"
           crossOrigin="anonymous"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
       </head>
       <body>
@@ -51,6 +68,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               data-adtest="off" />
           </div>
           {children}
+          <ReportButton />
         </I18nProvider>
       </body>
     </html>
