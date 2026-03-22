@@ -26,10 +26,20 @@
 
 html { scroll-behavior: smooth; }
 
+/* Metric-adjusted fallback font to prevent CLS when Inter loads */
+@font-face {
+  font-family: 'Inter-fallback';
+  src: local('Arial');
+  ascent-override: 90%;
+  descent-override: 22%;
+  line-gap-override: 0%;
+  size-adjust: 107%;
+}
+
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Inter', 'Inter-fallback', system-ui, -apple-system, sans-serif;
   line-height: 1.6;
   min-height: 100vh;
 }

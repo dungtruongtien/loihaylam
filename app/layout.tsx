@@ -24,12 +24,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+        {/* display=optional: browser uses system font immediately, loads Inter in background — eliminates font-caused LCP delay */}
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=optional" rel="stylesheet" />
+        {/* lazyOnload: AdSense loads only after all page content is done — doesn't block LCP/FCP */}
         <Script
-          async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5200581180131547"
           crossOrigin="anonymous"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
       </head>
       <body>
